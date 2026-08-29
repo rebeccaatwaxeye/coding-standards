@@ -1,0 +1,45 @@
+/**
+ * @nocturna/logger — zero-dependency structured logger for Node and the browser.
+ *
+ * @example
+ * ```ts
+ * import { createLogger, consoleSink, fileSink } from '@nocturna/logger'
+ *
+ * const log = createLogger({
+ *   module: 'worker',
+ *   sinks: [consoleSink(), fileSink({ dir: './logs', retainDays: 14 })],
+ * })
+ *
+ * log.info('job started', { operation: 'processOrder' })
+ * log.error('payment failed', { error: paymentErr, data: { orderId } })
+ * ```
+ */
+
+// --- Types ---
+export type {
+  LogLevel,
+  LogEntry,
+  LogError,
+  LogMeta,
+  Logger,
+  LoggerOptions,
+  Sink,
+} from './types.js'
+
+export { LEVEL_VALUE } from './types.js'
+
+// --- Core ---
+export { createLogger } from './create-logger.js'
+
+// --- Sinks ---
+export { consoleSink } from './sinks/console.js'
+export { fileSink } from './sinks/file.js'
+export type { FileSinkOptions } from './sinks/file.js'
+export { jsonSink } from './sinks/json.js'
+export type { JsonSinkOptions } from './sinks/json.js'
+
+// --- Levels ---
+export { resolveLevel, shouldLog } from './levels.js'
+
+// --- Redaction ---
+export { buildPatterns, redactEntry } from './redact.js'

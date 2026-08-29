@@ -1,0 +1,56 @@
+{
+  "name": "@nocturna/logger-electron",
+  "version": "0.1.0",
+  "description": "Electron-specific logger extensions — IPC bridge, file sink, and global error handlers",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./preload": {
+      "import": "./dist/esm/preload.js",
+      "require": "./dist/cjs/preload.js",
+      "types": "./dist/types/preload.d.ts"
+    }
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "format": "biome format --write src/"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@nocturna/logger": "workspace:*"
+  },
+  "peerDependencies": {
+    "electron": ">=20"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
+    "@types/node": "^26.4.0",
+    "electron": "^32.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.11"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nocturna/logger.git",
+    "directory": "electron"
+  }
+}
