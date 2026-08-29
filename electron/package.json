@@ -5,22 +5,26 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./preload": {
-      "import": "./dist/esm/preload.js",
-      "require": "./dist/cjs/preload.js",
-      "types": "./dist/types/preload.d.ts"
+      "types": "./dist/preload.d.ts",
+      "import": "./dist/preload.js",
+      "require": "./dist/preload.cjs"
     }
   },
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "registry": "https://nocturna.dev/coding-standards/~npm/",
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

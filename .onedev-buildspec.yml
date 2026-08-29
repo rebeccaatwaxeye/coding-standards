@@ -1,1 +1,156 @@
 version: 49
+
+jobs:
+  - name: CI
+    steps:
+      # 1) Checkout source
+      - !CheckoutStep
+        name: checkout
+        cloneCredential: !DefaultCredential {}
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 2) Set up pnpm cache (OneDev 10.1+ style)
+      - !SetUpCacheStep
+        name: set-up-pnpm-cache
+        key: pnpm-store-${{hashFiles('pnpm-lock.yaml')}}
+        paths:
+          - /root/.pnpm-store
+          - node_modules
+        loadKeys:
+          - pnpm-store
+        uploadStrategy: UPLOAD_IF_NOT_HIT
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 3) Install dependencies (frozen lockfile)
+      - !CommandStep
+        name: install
+        runInContainer: true
+        image: node:20-alpine
+        interpreter: !DefaultInterpreter
+          commands:
+            - corepack enable
+            - pnpm install --frozen-lockfile
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 4) Typecheck both packages
+      - !CommandStep
+        name: typecheck
+        runInContainer: true
+        image: node:20-alpine
+        interpreter: !DefaultInterpreter
+          commands:
+            - pnpm --filter @nocturna/logger run typecheck
+            - pnpm --filter @nocturna/logger-electron run typecheck
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 5) Run tests for both packages
+      - !CommandStep
+        name: test
+        runInContainer: true
+        image: node:20-alpine
+        interpreter: !DefaultInterpreter
+          commands:
+            - pnpm --filter @nocturna/logger run test
+            - pnpm --filter @nocturna/logger-electron run test
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 6) Build both packages
+      - !CommandStep
+        name: build
+        runInContainer: true
+        image: node:20-alpine
+        interpreter: !DefaultInterpreter
+          commands:
+            - pnpm --filter @nocturna/logger run build
+            - pnpm --filter @nocturna/logger-electron run build
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+    # Run on every push
+    triggers:
+      - !BranchUpdateTrigger {}
+
+    cpuRequirement: 500m
+    memoryRequirement: 1024m
+    timeout: 3600
+
+  - name: Publish
+    steps:
+      # 1) Checkout source
+      - !CheckoutStep
+        name: checkout
+        cloneCredential: !DefaultCredential {}
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 2) Set up cache
+      - !SetUpCacheStep
+        name: set-up-pnpm-cache
+        key: pnpm-store-${{hashFiles('pnpm-lock.yaml')}}
+        paths:
+          - /root/.pnpm-store
+          - node_modules
+        loadKeys:
+          - pnpm-store
+        uploadStrategy: UPLOAD_IF_NOT_HIT
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 3) Install
+      - !CommandStep
+        name: install
+        runInContainer: true
+        image: node:20-alpine
+        interpreter: !DefaultInterpreter
+          commands:
+            - corepack enable
+            - pnpm install --frozen-lockfile
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 4) Re-run the full gate — never publish an unvalidated build
+      - !CommandStep
+        name: validate
+        runInContainer: true
+        image: node:20-alpine
+        interpreter: !DefaultInterpreter
+          commands:
+            - pnpm --filter @nocturna/logger run typecheck
+            - pnpm --filter @nocturna/logger-electron run typecheck
+            - pnpm --filter @nocturna/logger run test
+            - pnpm --filter @nocturna/logger-electron run test
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 5) Build both packages
+      - !CommandStep
+        name: build
+        runInContainer: true
+        image: node:20-alpine
+        interpreter: !DefaultInterpreter
+          commands:
+            - pnpm --filter @nocturna/logger run build
+            - pnpm --filter @nocturna/logger-electron run build
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+      # 6) Publish to the OneDev npm registry.
+      #    Order matters: logger-electron depends on logger, so the core
+      #    package must be resolvable before electron is published.
+      - !CommandStep
+        name: publish
+        runInContainer: true
+        image: node:20-alpine
+        interpreter: !DefaultInterpreter
+          commands:
+            - |
+              set -e
+              npm config set @nocturna:registry $OneDev_server_url/$project_path/~npm/
+              npm config set -- '//$OneDev_server_url/$project_path/~npm/:_authToken' "@job_token@:@secret:access-token@"
+              # Core first, then electron (its workspace:* dep resolves to a concrete version)
+              pnpm --filter @nocturna/logger publish --no-git-checks
+              pnpm --filter @nocturna/logger-electron publish --no-git-checks
+        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+
+    # Publish only on tags matching v* (e.g. v0.1.0)
+    triggers:
+      - !TagCreateTrigger
+        tagPattern: "v*"
+
+    cpuRequirement: 500m
+    memoryRequirement: 1024m
+    timeout: 1800
