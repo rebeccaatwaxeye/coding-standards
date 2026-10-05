@@ -7,7 +7,7 @@ jobs:
       - !CheckoutStep
         name: checkout
         cloneCredential: !DefaultCredential {}
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 2) Set up pnpm cache (OneDev 10.1+ style)
       - !SetUpCacheStep
@@ -19,7 +19,7 @@ jobs:
         loadKeys:
           - pnpm-store
         uploadStrategy: UPLOAD_IF_NOT_HIT
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 3) Install dependencies (frozen lockfile)
       - !CommandStep
@@ -30,7 +30,7 @@ jobs:
           commands:
             - corepack enable
             - pnpm install --frozen-lockfile
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 4) Typecheck both packages
       - !CommandStep
@@ -41,7 +41,7 @@ jobs:
           commands:
             - pnpm --filter @nocturna/logger run typecheck
             - pnpm --filter @nocturna/logger-electron run typecheck
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 5) Run tests for both packages
       - !CommandStep
@@ -52,7 +52,7 @@ jobs:
           commands:
             - pnpm --filter @nocturna/logger run test
             - pnpm --filter @nocturna/logger-electron run test
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 6) Build both packages
       - !CommandStep
@@ -63,7 +63,7 @@ jobs:
           commands:
             - pnpm --filter @nocturna/logger run build
             - pnpm --filter @nocturna/logger-electron run build
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
     # Run on every push
     triggers:
@@ -79,7 +79,7 @@ jobs:
       - !CheckoutStep
         name: checkout
         cloneCredential: !DefaultCredential {}
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 2) Set up cache
       - !SetUpCacheStep
@@ -91,7 +91,7 @@ jobs:
         loadKeys:
           - pnpm-store
         uploadStrategy: UPLOAD_IF_NOT_HIT
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 3) Install
       - !CommandStep
@@ -102,7 +102,7 @@ jobs:
           commands:
             - corepack enable
             - pnpm install --frozen-lockfile
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 4) Re-run the full gate — never publish an unvalidated build
       - !CommandStep
@@ -115,7 +115,7 @@ jobs:
             - pnpm --filter @nocturna/logger-electron run typecheck
             - pnpm --filter @nocturna/logger run test
             - pnpm --filter @nocturna/logger-electron run test
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 5) Build both packages
       - !CommandStep
@@ -126,7 +126,7 @@ jobs:
           commands:
             - pnpm --filter @nocturna/logger run build
             - pnpm --filter @nocturna/logger-electron run build
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
       # 6) Publish to the OneDev npm registry.
       #    Order matters: logger-electron depends on logger, so the core
@@ -144,7 +144,7 @@ jobs:
               # Core first, then electron (its workspace:* dep resolves to a concrete version)
               pnpm --filter @nocturna/logger publish --no-git-checks
               pnpm --filter @nocturna/logger-electron publish --no-git-checks
-        condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+        condition: SUCCESSFUL
 
     # Publish only on tags matching v* (e.g. v0.1.0)
     triggers:
