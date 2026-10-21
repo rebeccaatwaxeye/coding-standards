@@ -38,9 +38,9 @@ jobs:
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @nocturna/logger run typecheck
+      commands: 'pnpm --filter @@nocturna/logger run typecheck
 
-        pnpm --filter @nocturna/logger-electron run typecheck
+        pnpm --filter @@nocturna/logger-electron run typecheck
 
         '
       shell: sh
@@ -52,9 +52,9 @@ jobs:
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @nocturna/logger run test
+      commands: 'pnpm --filter @@nocturna/logger run test
 
-        pnpm --filter @nocturna/logger-electron run test
+        pnpm --filter @@nocturna/logger-electron run test
 
         '
       shell: sh
@@ -66,9 +66,9 @@ jobs:
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @nocturna/logger run build
+      commands: 'pnpm --filter @@nocturna/logger run build
 
-        pnpm --filter @nocturna/logger-electron run build
+        pnpm --filter @@nocturna/logger-electron run build
 
         '
       shell: sh
@@ -118,13 +118,13 @@ jobs:
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @nocturna/logger run typecheck
+      commands: 'pnpm --filter @@nocturna/logger run typecheck
 
-        pnpm --filter @nocturna/logger-electron run typecheck
+        pnpm --filter @@nocturna/logger-electron run typecheck
 
-        pnpm --filter @nocturna/logger run test
+        pnpm --filter @@nocturna/logger run test
 
-        pnpm --filter @nocturna/logger-electron run test
+        pnpm --filter @@nocturna/logger-electron run test
 
         '
       shell: sh
@@ -136,9 +136,9 @@ jobs:
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @nocturna/logger run build
+      commands: 'pnpm --filter @@nocturna/logger run build
 
-        pnpm --filter @nocturna/logger-electron run build
+        pnpm --filter @@nocturna/logger-electron run build
 
         '
       shell: sh
@@ -152,16 +152,17 @@ jobs:
       type: PosixInterpreter
       commands: 'set -e
 
-        npm config set @nocturna:registry $OneDev_server_url/$project_path/~npm/
+        REGISTRY="@server_url@/@project_path@/~npm/"
 
-        npm config set -- ''//$OneDev_server_url/$project_path/~npm/:_authToken'' "@job_token@:@secret:access-token@"
+        npm config set @@nocturna:registry "$REGISTRY"
+
+        npm config set -- "//${REGISTRY#*://}:_authToken" "@job_token@:@secret:access-token@"
 
         # Core first, then electron (its workspace:* dep resolves to a concrete version)
 
-        pnpm --filter @nocturna/logger publish --no-git-checks
+        pnpm --filter @@nocturna/logger publish --no-git-checks
 
-        pnpm --filter @nocturna/logger-electron publish --no-git-checks
-
+        pnpm --filter @@nocturna/logger-electron publish --no-git-checks
 
         '
       shell: sh
