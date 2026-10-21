@@ -77,6 +77,9 @@ jobs:
   triggers:
   - type: BranchUpdateTrigger
   timeout: 3600
+  retryCondition: never
+  maxRetries: 0
+  retryDelay: 30
 - name: Publish
   steps:
   - type: CheckoutStep
@@ -168,3 +171,6 @@ jobs:
   - type: TagCreateTrigger
     tags: v*
   timeout: 1800
+  retryCondition: never
+  maxRetries: 0
+  retryDelay: 30
