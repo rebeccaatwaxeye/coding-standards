@@ -76,6 +76,7 @@ jobs:
     runAs: 0:0
   triggers:
   - type: BranchUpdateTrigger
+    userMatch: anyone
   timeout: 3600
   retryCondition: never
   maxRetries: 0
