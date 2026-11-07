@@ -118,23 +118,7 @@ export function formatBrowserArgs(entry: LogEntry): [string, string, ...unknown[
 	const badge = `%c ${entry.module}${location} %c ${icon} ${entry.level} ${entry.message}`
 	const badgeStyle = `background:${color};color:#fff;padding:2px 4px;border-radius:3px;font-weight:bold;`
 	const resetStyle = 'background:transparent;color:inherit;'
-	const _consoleMethod = mapLevelToConsole(entry.level)
 	return [badge, badgeStyle, resetStyle, ...(entry.error ? [entry.error] : [])]
-}
-
-function mapLevelToConsole(level: string): 'debug' | 'info' | 'warn' | 'error' {
-	switch (level) {
-		case 'CRITICAL':
-			return 'error'
-		case 'ERROR':
-			return 'error'
-		case 'WARN':
-			return 'warn'
-		case 'DEBUG':
-			return 'debug'
-		default:
-			return 'info'
-	}
 }
 
 function buildMetaSuffix(entry: LogEntry): string {

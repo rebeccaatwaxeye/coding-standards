@@ -21,9 +21,11 @@
 
 import type { Logger, LogLevel } from '@nocturna/logger'
 import { ipcMain } from 'electron'
+import { IPC_LOG_CHANNEL } from './ipc-channel.js'
 import type { LogIpcPayload } from './types.js'
 
-export const IPC_LOG_CHANNEL = '@nocturna/logger/log'
+// Re-exported so consumers (and index.ts) keep the existing import path.
+export { IPC_LOG_CHANNEL }
 
 /**
  * Map IPC level strings to logger methods.

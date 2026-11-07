@@ -17,8 +17,7 @@
  */
 
 import { contextBridge, ipcRenderer } from 'electron'
-
-const IPC_LOG_CHANNEL = '@nocturna/logger/log'
+import { IPC_LOG_CHANNEL } from './ipc-channel.js'
 
 /**
  * Expose the log bridge on `window.__nocturnaLog`.

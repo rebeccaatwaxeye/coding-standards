@@ -1,6 +1,6 @@
 {
   "name": "@nocturna/logger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Zero-dependency structured logger for Node and the browser",
   "type": "module",
   "exports": {
@@ -28,7 +28,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src/",

@@ -13,7 +13,7 @@ This repository is **not a normal application**. It contains two distinct delive
    - `electron/` → `@nocturna/logger-electron` — IPC bridge, file sink, global handlers
    - `node/configs/` → shippable lint config snippets (`@nocturna/logger/configs` export) enforcing §14.4
 
-Packages publish to a private OneDev npm registry (`nocturna.dev`), not npmjs.
+Packages publish to a private OneDev npm registry (`nocturna.dev`), not npmjs. `README.md` covers the same ground for humans; this file focuses on what agents trip over.
 
 ## Critical Gotcha: Two Different AGENTS.md Files
 
@@ -55,7 +55,8 @@ Before finishing any change, run lint, typecheck, test, and build for **both** p
 
 - The buildspec writes `@@nocturna/logger` with a **double @**. That is OneDev escaping of the `@` scope character, not a typo — several commits exist solely to fix this escaping. Do not "correct" it to a single `@`.
 - Publishing triggers on `v*` tags. The publish step builds and publishes **core first, then electron** — order matters because electron's `workspace:*` dependency on core must resolve to a concrete version.
-- Both packages must have their `version` bumped before tagging; the tag publishes whatever version is declared.
+- Bump `version` in **both** `package.json`s together before tagging — a `check-versions` step fails the Publish job on mismatch.
+- v0.1.0 was tagged before the CI fixes above and never published; the first proven release is v0.1.1.
 
 ## Architecture: The Logger
 
@@ -88,7 +89,7 @@ renderer: createRendererLogger(module)
 ```
 
 - The preload bridge falls back to plain `console[level]` in the renderer if the bridge isn't loaded yet.
-- `IPC_LOG_CHANNEL` is **defined twice** — in `preload.ts` and `ipc-handler.ts` — and must be kept in sync (they can't import each other: preload is a separate entry point).
+- The IPC channel name lives in **one place**: `src/ipc-channel.ts`, imported by both `preload.ts` and `ipc-handler.ts` (which are separate build entries and cannot import each other). `ipc-handler.ts` re-exports it to preserve the public import path.
 - `electronFileSink` wraps core `fileSink` with default dir `app.getPath('userData')/logs` and **7-day** retention (core default is 14 days).
 - `installGlobalHandlers` logs CRITICAL then exits(1) after a 200ms `setTimeout` to let sinks flush.
 - `createIpcLogHandler` takes a **factory**, not a logger, so each renderer module keeps its own module name.
@@ -113,7 +114,8 @@ This repo also dogfoods lint: each package root has a `biome.json` (schema 2.5.1
 - **Electron mocks**: every electron module test starts with `vi.mock('electron', () => ({...}))` (and `vi.mock('@nocturna/logger', ...)` where needed), restoring with `vi.restoreAllMocks()`. Use `vi.resetModules()` when testing module side effects (preload auto-exposes the bridge on import — tests use dynamic `await import('./preload.js')`).
 - **Logger tests** use a `captureSink()` helper (a `Sink` that pushes entries into an array) and save/restore `NODE_ENV` / `LOG_LEVEL` in `beforeEach`/`afterEach` because level resolution reads env vars.
 - Coverage excludes `src/index.ts` (barrel) and `src/types.ts` (electron only).
-- Known gap: the core sinks (`console.ts`, `file.ts`, `json.ts`) have **no test files** yet.
+- Both packages enforce coverage thresholds on every test run (90% statements/functions/lines, 80% branches) — `pnpm --filter <pkg> test` fails below them because the test script runs `vitest run --coverage`.
+- `src/configs.test.ts` pins the `@nocturna/logger/configs` export contract: if `configs/eslint.flat.js` changes, update this test and the hand-maintained `configs/eslint.flat.d.ts` together.
 - Note the tsconfig asymmetry: `node/tsconfig.json` excludes `**/*.test.ts` from typecheck, `electron/tsconfig.json` does not — electron test files are typechecked.
 
 ## Non-Obvious Trivia

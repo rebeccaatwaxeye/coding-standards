@@ -128,6 +128,18 @@ jobs:
     condition: SUCCESSFUL
     runAs: 0:0
   - type: CommandStep
+    name: check-versions
+    runInContainer: true
+    image: node:20-alpine
+    interpreter:
+      type: PosixInterpreter
+      commands: 'node -e "const v=(p)=>JSON.parse(require(''fs'').readFileSync(p,''utf8'')).version;const a=v(''node/package.json''),b=v(''electron/package.json'');if(a!==b){console.error(''version mismatch: @nocturna/logger=''+a+'' @nocturna/logger-electron=''+b);process.exit(1);}console.log(''package versions aligned: ''+a);"
+
+        '
+      shell: sh
+    condition: SUCCESSFUL
+    runAs: 0:0
+  - type: CommandStep
     name: build
     runInContainer: true
     image: node:20-alpine
