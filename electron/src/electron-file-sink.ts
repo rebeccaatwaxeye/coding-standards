@@ -6,11 +6,10 @@
  * in Electron main-process code.
  */
 
-import { app } from 'electron'
 import { join } from 'node:path'
+import type { FileSinkOptions, Sink } from '@nocturna/logger'
 import { fileSink } from '@nocturna/logger'
-import type { FileSinkOptions } from '@nocturna/logger'
-import type { Sink } from '@nocturna/logger'
+import { app } from 'electron'
 
 /**
  * Create a file sink that writes to `app.getPath('userData')/logs/` by default.
@@ -25,11 +24,13 @@ import type { Sink } from '@nocturna/logger'
  * })
  * ```
  */
-export function electronFileSink(options: Omit<FileSinkOptions, 'dir'> & { dir?: string } = {}): Sink {
-  return fileSink({
-    // Only touch Electron's app API when we actually need the default path
-    dir: options.dir ?? join(app.getPath('userData'), 'logs'),
-    retainDays: options.retainDays ?? 7,
-    maxTotalSizeMB: options.maxTotalSizeMB ?? 100,
-  })
+export function electronFileSink(
+	options: Omit<FileSinkOptions, 'dir'> & { dir?: string } = {},
+): Sink {
+	return fileSink({
+		// Only touch Electron's app API when we actually need the default path
+		dir: options.dir ?? join(app.getPath('userData'), 'logs'),
+		retainDays: options.retainDays ?? 7,
+		maxTotalSizeMB: options.maxTotalSizeMB ?? 100,
+	})
 }

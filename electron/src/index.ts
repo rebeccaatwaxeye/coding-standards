@@ -36,23 +36,21 @@
 
 // --- Re-export core ---
 export type {
-  LogLevel,
-  LogEntry,
-  LogError,
-  LogMeta,
-  Logger,
-  LoggerOptions,
-  Sink,
+	LogEntry,
+	LogError,
+	Logger,
+	LoggerOptions,
+	LogLevel,
+	LogMeta,
+	Sink,
 } from '@nocturna/logger'
-export { LEVEL_VALUE } from '@nocturna/logger'
-export { createLogger } from '@nocturna/logger'
-export { consoleSink, jsonSink } from '@nocturna/logger'
+export { consoleSink, createLogger, jsonSink, LEVEL_VALUE } from '@nocturna/logger'
 
 // --- Electron-specific ---
 export { electronFileSink } from './electron-file-sink.js'
+export { installGlobalHandlers } from './global-handlers.js'
 export { createIpcLogHandler, IPC_LOG_CHANNEL } from './ipc-handler.js'
 export { createRendererLogger } from './renderer.js'
-export { installGlobalHandlers } from './global-handlers.js'
 
 // --- Types ---
 export type { ElectronLogEntry, ElectronProcess, LogIpcPayload } from './types.js'

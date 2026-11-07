@@ -1,5 +1,5 @@
-import type { Sink, LogEntry } from '../types.js'
 import { formatAnsi, formatBrowserArgs } from '../format.js'
+import type { LogEntry, Sink } from '../types.js'
 
 /**
  * Console sink — works in both Node and the browser.
@@ -10,36 +10,42 @@ import { formatAnsi, formatBrowserArgs } from '../format.js'
  * This is the default sink when none is provided.
  */
 export function consoleSink(): Sink {
-  return {
-    write(entry: LogEntry) {
-      if (isBrowser()) {
-        const args = formatBrowserArgs(entry)
-        const consoleMethod = getBrowserConsole(entry.level)
-        consoleMethod.call(console, ...args)
-      } else {
-        const line = formatAnsi(entry)
-        if (entry.level === 'ERROR' || entry.level === 'CRITICAL') {
-          process.stderr.write(line)
-        } else {
-          process.stdout.write(line)
-        }
-      }
-    },
-  }
+	return {
+		write(entry: LogEntry) {
+			if (isBrowser()) {
+				const args = formatBrowserArgs(entry)
+				const consoleMethod = getBrowserConsole(entry.level)
+				consoleMethod.call(console, ...args)
+			} else {
+				const line = formatAnsi(entry)
+				if (entry.level === 'ERROR' || entry.level === 'CRITICAL') {
+					process.stderr.write(line)
+				} else {
+					process.stdout.write(line)
+				}
+			}
+		},
+	}
 }
 
 function isBrowser(): boolean {
-  return typeof window !== 'undefined'
-    && typeof window.document !== 'undefined'
-    && typeof console !== 'undefined'
+	return (
+		typeof window !== 'undefined' &&
+		typeof window.document !== 'undefined' &&
+		typeof console !== 'undefined'
+	)
 }
 
 function getBrowserConsole(level: string): typeof console.debug {
-  switch (level) {
-    case 'CRITICAL':
-    case 'ERROR':  return console.error
-    case 'WARN':   return console.warn
-    case 'DEBUG':  return console.debug
-    default:       return console.info
-  }
+	switch (level) {
+		case 'CRITICAL':
+		case 'ERROR':
+			return console.error
+		case 'WARN':
+			return console.warn
+		case 'DEBUG':
+			return console.debug
+		default:
+			return console.info
+	}
 }

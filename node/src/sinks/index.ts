@@ -1,5 +1,5 @@
 export { consoleSink } from './console.js'
-export { fileSink } from './file.js'
 export type { FileSinkOptions } from './file.js'
-export { jsonSink } from './json.js'
+export { fileSink } from './file.js'
 export type { JsonSinkOptions } from './json.js'
+export { jsonSink } from './json.js'

@@ -19,8 +19,8 @@
  * attributed to the main process module.
  */
 
-import { ipcMain } from 'electron'
 import type { Logger, LogLevel } from '@nocturna/logger'
+import { ipcMain } from 'electron'
 import type { LogIpcPayload } from './types.js'
 
 export const IPC_LOG_CHANNEL = '@nocturna/logger/log'
@@ -29,11 +29,11 @@ export const IPC_LOG_CHANNEL = '@nocturna/logger/log'
  * Map IPC level strings to logger methods.
  */
 const LEVEL_METHOD = {
-  DEBUG: 'debug',
-  INFO: 'info',
-  WARN: 'warn',
-  ERROR: 'error',
-  CRITICAL: 'critical',
+	DEBUG: 'debug',
+	INFO: 'info',
+	WARN: 'warn',
+	ERROR: 'error',
+	CRITICAL: 'critical',
 } as const satisfies Record<Exclude<LogLevel, 'SILENT'>, keyof Logger>
 
 /**
@@ -42,25 +42,23 @@ const LEVEL_METHOD = {
  * @param createLoggerFor - Factory that builds a logger for a given module name.
  *                          Called once per distinct renderer module, then cached.
  */
-export function createIpcLogHandler(
-  createLoggerFor: (module: string) => Logger,
-): void {
-  // Cache one logger per renderer module — avoid rebuilding on every log call.
-  const loggers = new Map<string, Logger>()
+export function createIpcLogHandler(createLoggerFor: (module: string) => Logger): void {
+	// Cache one logger per renderer module — avoid rebuilding on every log call.
+	const loggers = new Map<string, Logger>()
 
-  ipcMain.on(IPC_LOG_CHANNEL, (_event, payload: LogIpcPayload) => {
-    const { level, module: mod, message, traceId, operation, data, error } = payload
+	ipcMain.on(IPC_LOG_CHANNEL, (_event, payload: LogIpcPayload) => {
+		const { level, module: mod, message, traceId, operation, data, error } = payload
 
-    // SILENT entries are never sent, but guard anyway — nothing to write to.
-    if (level === 'SILENT') return
+		// SILENT entries are never sent, but guard anyway — nothing to write to.
+		if (level === 'SILENT') return
 
-    let logger = loggers.get(mod)
-    if (!logger) {
-      logger = createLoggerFor(mod)
-      loggers.set(mod, logger)
-    }
+		let logger = loggers.get(mod)
+		if (!logger) {
+			logger = createLoggerFor(mod)
+			loggers.set(mod, logger)
+		}
 
-    const method = LEVEL_METHOD[level]
-    logger[method](message, { traceId, operation, data, error })
-  })
+		const method = LEVEL_METHOD[level]
+		logger[method](message, { traceId, operation, data, error })
+	})
 }

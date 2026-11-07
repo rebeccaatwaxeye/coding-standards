@@ -17,21 +17,21 @@ import type { Logger } from '@nocturna/logger'
  * and be restarted by the supervisor — not limp along in an unknown state.
  */
 export function installGlobalHandlers(logger: Logger): void {
-  process.on('unhandledRejection', (reason, promise) => {
-    const error = reason instanceof Error ? reason : new Error(String(reason))
-    logger.critical('Unhandled promise rejection — process cannot continue', {
-      error,
-      data: { type: 'unhandledRejection' },
-    })
-    // Give sinks time to flush to file before exiting
-    setTimeout(() => process.exit(1), 200)
-  })
+	process.on('unhandledRejection', (reason, _promise) => {
+		const error = reason instanceof Error ? reason : new Error(String(reason))
+		logger.critical('Unhandled promise rejection — process cannot continue', {
+			error,
+			data: { type: 'unhandledRejection' },
+		})
+		// Give sinks time to flush to file before exiting
+		setTimeout(() => process.exit(1), 200)
+	})
 
-  process.on('uncaughtException', (error) => {
-    logger.critical('Uncaught exception — process cannot continue', {
-      error,
-      data: { type: 'uncaughtException' },
-    })
-    setTimeout(() => process.exit(1), 200)
-  })
+	process.on('uncaughtException', (error) => {
+		logger.critical('Uncaught exception — process cannot continue', {
+			error,
+			data: { type: 'uncaughtException' },
+		})
+		setTimeout(() => process.exit(1), 200)
+	})
 }

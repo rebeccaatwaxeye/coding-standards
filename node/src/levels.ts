@@ -10,14 +10,14 @@ import { LEVEL_VALUE } from './types.js'
  *  3. Environment detection: dev → DEBUG, prod → ERROR, test → SILENT
  */
 export function resolveLevel(explicit?: LogLevel): LogLevel {
-  if (explicit) return explicit
+	if (explicit) return explicit
 
-  const envLevel = getEnvLevel()
-  if (envLevel) return envLevel
+	const envLevel = getEnvLevel()
+	if (envLevel) return envLevel
 
-  if (isTest()) return 'SILENT'
-  if (isDev()) return 'DEBUG'
-  return 'ERROR'
+	if (isTest()) return 'SILENT'
+	if (isDev()) return 'DEBUG'
+	return 'ERROR'
 }
 
 /**
@@ -28,29 +28,31 @@ export function resolveLevel(explicit?: LogLevel): LogLevel {
  * every entry through a `>=` comparison, which is the opposite of the intent.)
  */
 export function shouldLog(entry: LogLevel, minimum: LogLevel): boolean {
-  if (minimum === 'SILENT') return false
-  if (entry === 'SILENT') return false
-  return LEVEL_VALUE[entry] >= LEVEL_VALUE[minimum]
+	if (minimum === 'SILENT') return false
+	if (entry === 'SILENT') return false
+	return LEVEL_VALUE[entry] >= LEVEL_VALUE[minimum]
 }
 
 // --- Environment detection ---
 
 function getEnvLevel(): LogLevel | null {
-  const raw = getEnv('LOG_LEVEL')
-  if (!raw) return null
-  const upper = raw.toUpperCase() as LogLevel
-  if (upper in LEVEL_VALUE) return upper
-  return null
+	const raw = getEnv('LOG_LEVEL')
+	if (!raw) return null
+	const upper = raw.toUpperCase() as LogLevel
+	if (upper in LEVEL_VALUE) return upper
+	return null
 }
 
 function isDev(): boolean {
-  return getEnv('NODE_ENV') === 'development'
-    || getEnv('DEV') === 'true'
-    || getEnv('VITE_DEV_SERVER_URL') !== undefined
+	return (
+		getEnv('NODE_ENV') === 'development' ||
+		getEnv('DEV') === 'true' ||
+		getEnv('VITE_DEV_SERVER_URL') !== undefined
+	)
 }
 
 function isTest(): boolean {
-  return getEnv('NODE_ENV') === 'test'
+	return getEnv('NODE_ENV') === 'test'
 }
 
 /**
@@ -58,8 +60,8 @@ function isTest(): boolean {
  * Browsers return undefined (no env vars).
  */
 function getEnv(key: string): string | undefined {
-  if (typeof process !== 'undefined' && process.env?.[key] !== undefined) {
-    return process.env[key]
-  }
-  return undefined
+	if (typeof process !== 'undefined' && process.env?.[key] !== undefined) {
+		return process.env[key]
+	}
+	return undefined
 }

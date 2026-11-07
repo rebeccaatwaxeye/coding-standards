@@ -15,31 +15,27 @@
  * ```
  */
 
-// --- Types ---
-export type {
-  LogLevel,
-  LogEntry,
-  LogError,
-  LogMeta,
-  Logger,
-  LoggerOptions,
-  Sink,
-} from './types.js'
-
-export { LEVEL_VALUE } from './types.js'
-
 // --- Core ---
 export { createLogger } from './create-logger.js'
+// --- Levels ---
+export { resolveLevel, shouldLog } from './levels.js'
+// --- Redaction ---
+export { buildPatterns, redactEntry } from './redact.js'
 
 // --- Sinks ---
 export { consoleSink } from './sinks/console.js'
-export { fileSink } from './sinks/file.js'
 export type { FileSinkOptions } from './sinks/file.js'
-export { jsonSink } from './sinks/json.js'
+export { fileSink } from './sinks/file.js'
 export type { JsonSinkOptions } from './sinks/json.js'
-
-// --- Levels ---
-export { resolveLevel, shouldLog } from './levels.js'
-
-// --- Redaction ---
-export { buildPatterns, redactEntry } from './redact.js'
+export { jsonSink } from './sinks/json.js'
+// --- Types ---
+export type {
+	LogEntry,
+	LogError,
+	Logger,
+	LoggerOptions,
+	LogLevel,
+	LogMeta,
+	Sink,
+} from './types.js'
+export { LEVEL_VALUE } from './types.js'

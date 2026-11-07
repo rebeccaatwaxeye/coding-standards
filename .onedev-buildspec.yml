@@ -33,6 +33,34 @@ jobs:
     condition: SUCCESSFUL
     runAs: 0:0
   - type: CommandStep
+    name: lint
+    runInContainer: true
+    image: node:20-alpine
+    interpreter:
+      type: PosixInterpreter
+      commands: 'pnpm --filter @@nocturna/logger run lint
+
+        pnpm --filter @@nocturna/logger-electron run lint
+
+        '
+      shell: sh
+    condition: SUCCESSFUL
+    runAs: 0:0
+  - type: CommandStep
+    name: build
+    runInContainer: true
+    image: node:20-alpine
+    interpreter:
+      type: PosixInterpreter
+      commands: 'pnpm --filter @@nocturna/logger run build
+
+        pnpm --filter @@nocturna/logger-electron run build
+
+        '
+      shell: sh
+    condition: SUCCESSFUL
+    runAs: 0:0
+  - type: CommandStep
     name: typecheck
     runInContainer: true
     image: node:20-alpine
@@ -55,20 +83,6 @@ jobs:
       commands: 'pnpm --filter @@nocturna/logger run test
 
         pnpm --filter @@nocturna/logger-electron run test
-
-        '
-      shell: sh
-    condition: SUCCESSFUL
-    runAs: 0:0
-  - type: CommandStep
-    name: build
-    runInContainer: true
-    image: node:20-alpine
-    interpreter:
-      type: PosixInterpreter
-      commands: 'pnpm --filter @@nocturna/logger run build
-
-        pnpm --filter @@nocturna/logger-electron run build
 
         '
       shell: sh
@@ -114,6 +128,20 @@ jobs:
     condition: SUCCESSFUL
     runAs: 0:0
   - type: CommandStep
+    name: build
+    runInContainer: true
+    image: node:20-alpine
+    interpreter:
+      type: PosixInterpreter
+      commands: 'pnpm --filter @@nocturna/logger run build
+
+        pnpm --filter @@nocturna/logger-electron run build
+
+        '
+      shell: sh
+    condition: SUCCESSFUL
+    runAs: 0:0
+  - type: CommandStep
     name: validate
     runInContainer: true
     image: node:20-alpine
@@ -126,20 +154,6 @@ jobs:
         pnpm --filter @@nocturna/logger run test
 
         pnpm --filter @@nocturna/logger-electron run test
-
-        '
-      shell: sh
-    condition: SUCCESSFUL
-    runAs: 0:0
-  - type: CommandStep
-    name: build
-    runInContainer: true
-    image: node:20-alpine
-    interpreter:
-      type: PosixInterpreter
-      commands: 'pnpm --filter @@nocturna/logger run build
-
-        pnpm --filter @@nocturna/logger-electron run build
 
         '
       shell: sh

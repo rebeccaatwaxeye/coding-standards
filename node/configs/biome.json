@@ -1,17 +1,15 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noEmptyBlockStatements": "error",
-        "noConsoleLog": "error"
-      },
-      "correctness": {
-        "noUnusedVariables": "error"
-      }
-    }
-  },
-  "_comment": "§14.4 lint config — merges into your project's biome.json under 'linter.rules'"
+	"$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
+	"root": false,
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"suspicious": {
+				"noEmptyBlockStatements": "error",
+				"noConsole": { "level": "error", "options": { "allow": [] } }
+			},
+			"correctness": { "noUnusedVariables": "error" }
+		}
+	}
 }

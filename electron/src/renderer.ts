@@ -13,18 +13,18 @@
  * ```
  */
 
-import type { Logger, LoggerOptions, LogMeta, LogLevel } from '@nocturna/logger'
+import type { Logger, LogLevel, LogMeta } from '@nocturna/logger'
 import { resolveLevel, shouldLog } from '@nocturna/logger'
 
 declare global {
-  interface Window {
-    __nocturnaLog?: (
-      level: string,
-      module: string,
-      message: string,
-      meta?: Record<string, unknown>,
-    ) => void
-  }
+	interface Window {
+		__nocturnaLog?: (
+			level: string,
+			module: string,
+			message: string,
+			meta?: Record<string, unknown>,
+		) => void
+	}
 }
 
 /**
@@ -33,73 +33,80 @@ declare global {
  * Falls back to `console[level](...)` if the preload bridge is not available
  * (e.g. during development before preload is loaded).
  */
-export function createRendererLogger(
-  moduleName: string,
-  level?: LogLevel,
-): Logger {
-  const effectiveLevel = resolveLevel(level)
-  const send = window.__nocturnaLog
+export function createRendererLogger(moduleName: string, level?: LogLevel): Logger {
+	const effectiveLevel = resolveLevel(level)
+	const send = window.__nocturnaLog
 
-  function write(lvl: LogLevel, msg: unknown, meta?: LogMeta): void {
-    if (!shouldLog(lvl, effectiveLevel)) return
-    const message = formatMessage(msg)
-    const payload: Record<string, unknown> = {}
-    if (meta?.traceId) payload.traceId = meta.traceId
-    if (meta?.operation) payload.operation = meta.operation
-    if (meta?.data !== undefined) payload.data = meta.data
-    if (meta?.error !== undefined) payload.error = normaliseError(meta.error)
+	function write(lvl: LogLevel, msg: unknown, meta?: LogMeta): void {
+		if (!shouldLog(lvl, effectiveLevel)) return
+		const message = formatMessage(msg)
+		const payload: Record<string, unknown> = {}
+		if (meta?.traceId) payload.traceId = meta.traceId
+		if (meta?.operation) payload.operation = meta.operation
+		if (meta?.data !== undefined) payload.data = meta.data
+		if (meta?.error !== undefined) payload.error = normaliseError(meta.error)
 
-    if (send) {
-      send(lvl, moduleName, message, payload)
-    } else {
-      // Fallback — preload bridge not yet available
-      const consoleFn = getConsoleFn(lvl)
-      consoleFn(`[${moduleName}] [${lvl}] ${message}`, payload)
-    }
-  }
+		if (send) {
+			send(lvl, moduleName, message, payload)
+		} else {
+			// Fallback — preload bridge not yet available
+			const consoleFn = getConsoleFn(lvl)
+			consoleFn(`[${moduleName}] [${lvl}] ${message}`, payload)
+		}
+	}
 
-  const logger: Logger = Object.assign(
-    (msg?: unknown, meta?: LogMeta) => write('INFO', msg, meta),
-    {
-      module: moduleName,
-      debug:  (msg?: unknown, meta?: LogMeta) => write('DEBUG', msg, meta),
-      info:   (msg?: unknown, meta?: LogMeta) => write('INFO', msg, meta),
-      warn:   (msg?: unknown, meta?: LogMeta) => write('WARN', msg, meta),
-      error:  (msg?: unknown, meta?: LogMeta) => write('ERROR', msg, meta),
-      critical: (msg?: unknown, meta?: LogMeta) => write('CRITICAL', msg, meta),
-      dispose() { /* no-op — no resources to clean up in renderer */ },
-    } satisfies Partial<Logger> as Omit<Logger, never>,
-  )
+	const logger: Logger = Object.assign(
+		(msg?: unknown, meta?: LogMeta) => write('INFO', msg, meta),
+		{
+			module: moduleName,
+			debug: (msg?: unknown, meta?: LogMeta) => write('DEBUG', msg, meta),
+			info: (msg?: unknown, meta?: LogMeta) => write('INFO', msg, meta),
+			warn: (msg?: unknown, meta?: LogMeta) => write('WARN', msg, meta),
+			error: (msg?: unknown, meta?: LogMeta) => write('ERROR', msg, meta),
+			critical: (msg?: unknown, meta?: LogMeta) => write('CRITICAL', msg, meta),
+			dispose() {
+				/* no-op — no resources to clean up in renderer */
+			},
+		} satisfies Partial<Logger> as Omit<Logger, never>,
+	)
 
-  return logger as Logger
+	return logger as Logger
 }
 
 // ---- Internals ----
 
 function getConsoleFn(level: string): typeof console.info {
-  switch (level) {
-    case 'CRITICAL':
-    case 'ERROR':  return console.error
-    case 'WARN':   return console.warn
-    case 'DEBUG':  return console.debug
-    default:       return console.info
-  }
+	switch (level) {
+		case 'CRITICAL':
+		case 'ERROR':
+			return console.error
+		case 'WARN':
+			return console.warn
+		case 'DEBUG':
+			return console.debug
+		default:
+			return console.info
+	}
 }
 
 function formatMessage(msg: unknown): string {
-  if (msg === undefined) return ''
-  if (msg === null) return 'null'
-  if (typeof msg === 'string') return msg
-  if (typeof msg === 'number' || typeof msg === 'boolean') return String(msg)
-  if (msg instanceof Error) return msg.message
-  try { return JSON.stringify(msg) } catch { return String(msg) }
+	if (msg === undefined) return ''
+	if (msg === null) return 'null'
+	if (typeof msg === 'string') return msg
+	if (typeof msg === 'number' || typeof msg === 'boolean') return String(msg)
+	if (msg instanceof Error) return msg.message
+	try {
+		return JSON.stringify(msg)
+	} catch {
+		return String(msg)
+	}
 }
 
 function normaliseError(err: unknown): Record<string, unknown> | undefined {
-  if (!err) return undefined
-  if (err instanceof Error) {
-    return { name: err.name, message: err.message, stack: err.stack }
-  }
-  if (typeof err === 'string') return { name: 'Error', message: err }
-  return { name: 'Error', message: String(err) }
+	if (!err) return undefined
+	if (err instanceof Error) {
+		return { name: err.name, message: err.message, stack: err.stack }
+	}
+	if (typeof err === 'string') return { name: 'Error', message: err }
+	return { name: 'Error', message: String(err) }
 }
