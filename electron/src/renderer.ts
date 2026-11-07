@@ -14,7 +14,7 @@
  */
 
 import type { Logger, LogLevel, LogMeta } from '@nocturna/logger'
-import { resolveLevel, shouldLog } from '@nocturna/logger'
+import { formatMessage, normaliseError, resolveLevel, shouldLog } from '@nocturna/logger'
 
 declare global {
 	interface Window {
@@ -87,26 +87,4 @@ function getConsoleFn(level: string): typeof console.info {
 		default:
 			return console.info
 	}
-}
-
-function formatMessage(msg: unknown): string {
-	if (msg === undefined) return ''
-	if (msg === null) return 'null'
-	if (typeof msg === 'string') return msg
-	if (typeof msg === 'number' || typeof msg === 'boolean') return String(msg)
-	if (msg instanceof Error) return msg.message
-	try {
-		return JSON.stringify(msg)
-	} catch {
-		return String(msg)
-	}
-}
-
-function normaliseError(err: unknown): Record<string, unknown> | undefined {
-	if (!err) return undefined
-	if (err instanceof Error) {
-		return { name: err.name, message: err.message, stack: err.stack }
-	}
-	if (typeof err === 'string') return { name: 'Error', message: err }
-	return { name: 'Error', message: String(err) }
 }

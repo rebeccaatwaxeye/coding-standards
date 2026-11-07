@@ -27,36 +27,29 @@ Note that `install.sh` rewrites relative paths (`rules/X.md` → `agents/rules/X
 
 ## Commands
 
-No root `package.json` exists — only `pnpm-workspace.yaml`. All package work happens via filters from the repo root:
+The root `package.json` pins pnpm (`packageManager`, so corepack is deterministic in CI) and exposes workspace scripts that run in the right order:
 
 ```bash
-corepack enable                                    # pnpm via corepack (matches CI)
-pnpm install --frozen-lockfile                     # install
-
-pnpm --filter @nocturna/logger typecheck           # tsc --noEmit
-pnpm --filter @nocturna/logger test                # vitest run
-pnpm --filter @nocturna/logger test:watch
-pnpm --filter @nocturna/logger build               # tsup (cjs + esm + dts, clean)
-pnpm --filter @nocturna/logger lint                # biome check src/
-pnpm --filter @nocturna/logger format              # biome format --write src/
-
-# Same scripts exist for @nocturna/logger-electron
+pnpm install --frozen-lockfile
+pnpm build        # both packages, core first (topological order)
+pnpm test         # builds first, then tests with coverage gates
+pnpm typecheck    # builds first, then tsc --noEmit in both packages
+pnpm lint         # biome check in both packages
+pnpm format
 ```
 
-Local dev order matters: **build the core package before running electron typecheck or tests** — electron resolves `@nocturna/logger` types and runtime through core's `dist/` output. From a fresh clone:
+The build-chaining matters: electron resolves `@nocturna/logger` types and runtime through core's `dist/` output. Equivalent per-package commands (`pnpm --filter @nocturna/logger-electron <script>`) also exist (build, test, test:watch, typecheck, lint, format).
 
-```bash
-pnpm --filter @nocturna/logger build     # first, always
-```
+Before finishing any change, run lint, build, typecheck, and test — that is what CI (`.onedev-buildspec.yml`, OneDev) does on every branch update, in the order lint → build → typecheck → test. A husky pre-commit hook runs `pnpm -r run lint` as a commit-time gate.
 
-Before finishing any change, run lint, typecheck, test, and build for **both** packages — that is exactly what CI (`.onedev-buildspec.yml`, OneDev) does on every branch update, in the order lint → build → typecheck → test.
+Releases: `./scripts/release.sh X.Y.Z` bumps both packages, runs lint/build/test, commits `chore(release): vX.Y.Z`, and creates the tag. Pushing the tag triggers Publish.
 
 ### CI / Publishing Gotchas
 
 - The buildspec writes `@@nocturna/logger` with a **double @**. That is OneDev escaping of the `@` scope character, not a typo — several commits exist solely to fix this escaping. Do not "correct" it to a single `@`.
-- Publishing triggers on `v*` tags. The publish step builds and publishes **core first, then electron** — order matters because electron's `workspace:*` dependency on core must resolve to a concrete version.
-- Bump `version` in **both** `package.json`s together before tagging — a `check-versions` step fails the Publish job on mismatch.
-- v0.1.0 was tagged before the CI fixes above and never published; the first proven release is v0.1.1.
+- Publishing triggers on `v*` tags. The publish job runs: check-versions → build → smoke-test → validate → publish. The smoke test packs both tarballs, installs core from its tarball, and verifies the electron tarball contents before anything is published. Publish order is **core first, then electron** — electron's `workspace:*` dependency on core must resolve to a concrete version.
+- Bump `version` in **both** `package.json`s together (or use `scripts/release.sh`, which does it atomically) — the `check-versions` step fails the Publish job on mismatch.
+- v0.1.0 was tagged before the CI fixes above and never published; v0.1.1 is the first proven release. Notable changes go in `CHANGELOG.md`.
 
 ## Architecture: The Logger
 
@@ -90,6 +83,7 @@ renderer: createRendererLogger(module)
 
 - The preload bridge falls back to plain `console[level]` in the renderer if the bridge isn't loaded yet.
 - The IPC channel name lives in **one place**: `src/ipc-channel.ts`, imported by both `preload.ts` and `ipc-handler.ts` (which are separate build entries and cannot import each other). `ipc-handler.ts` re-exports it to preserve the public import path.
+- `formatMessage()` and `normaliseError()` are exported from core (`node/src/message.ts`) and reused by the Electron renderer — don't re-implement message coercion locally.
 - `electronFileSink` wraps core `fileSink` with default dir `app.getPath('userData')/logs` and **7-day** retention (core default is 14 days).
 - `installGlobalHandlers` logs CRITICAL then exits(1) after a 200ms `setTimeout` to let sinks flush.
 - `createIpcLogHandler` takes a **factory**, not a logger, so each renderer module keeps its own module name.
@@ -122,4 +116,5 @@ This repo also dogfoods lint: each package root has a `biome.json` (schema 2.5.1
 
 - `node/cjs/`, `node/esm/`, `node/ts/` are empty, gitignored leftovers from an earlier build setup — ignore them; real output goes to `dist/` via tsup.
 - `pnpm-workspace.yaml` sets `onlyBuiltDependencies: [esbuild]` and `ignoredBuiltDependencies: [electron]` — electron's postinstall (a large binary download) is deliberately skipped; dev work only needs its type declarations and the tests mock the `electron` module.
+- `@biomejs/biome` is floored at `^2.5.11` and the configs use the 2.5 schema — keep the floor and schema version in sync when upgrading Biome. `@types/node` is aligned to ^20 (the CI runtime), not the latest.
 - Repo history is short; feature commits use conventional-commit style (`feat(logger):`, `fix(ci):`, `feat(agents):`).

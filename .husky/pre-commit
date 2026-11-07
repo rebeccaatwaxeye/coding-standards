@@ -1,0 +1,2 @@
+# §11 — run the lint gate (lint + format check) before every commit.
+pnpm -r run lint

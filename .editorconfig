@@ -1,0 +1,22 @@
+# §11 — Tooling configuration: cross-editor consistency.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{ts,tsx,js,mjs,cjs}]
+indent_style = tab
+indent_size = 2
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[**/biome.json]
+indent_style = tab
+
+[*.md]
+trim_trailing_whitespace = false

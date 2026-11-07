@@ -19,6 +19,8 @@
 export { createLogger } from './create-logger.js'
 // --- Levels ---
 export { resolveLevel, shouldLog } from './levels.js'
+// --- Message helpers (shared with the Electron renderer bridge) ---
+export { formatMessage, normaliseError } from './message.js'
 // --- Redaction ---
 export { buildPatterns, redactEntry } from './redact.js'
 

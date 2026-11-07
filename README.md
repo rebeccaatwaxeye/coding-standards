@@ -60,18 +60,18 @@ any sink sees the entry.
 
 ## Development
 
-Requires Node >= 18 and pnpm (via corepack or your version manager).
+Requires Node >= 18; pnpm is pinned via the root `packageManager` field (corepack handles it).
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm --filter @nocturna/logger build          # build core first
-pnpm --filter @nocturna/logger test
-pnpm --filter @nocturna/logger typecheck
-pnpm --filter @nocturna/logger lint           # same scripts in electron/
+pnpm install
+pnpm build        # both packages, core first (topological order)
+pnpm test         # builds first, then tests with coverage gates
+pnpm typecheck    # builds first, then tsc --noEmit in both packages
+pnpm lint         # biome check in both packages
+pnpm format
 ```
 
-**The electron package resolves `@nocturna/logger` through core's `dist/`
-output — always build core before typechecking or testing electron.**
+A pre-commit hook (husky) runs the lint gate before every commit.
 
 Agents working in this repo should read [AGENTS.md](AGENTS.md).
 
@@ -80,11 +80,14 @@ Agents working in this repo should read [AGENTS.md](AGENTS.md).
 - **CI** (OneDev, `.onedev-buildspec.yml`) runs on every branch update:
   lint → build → typecheck → test for both packages.
 - **Publish** triggers on `v*` tags: checks version parity between the two
-  packages, builds, validates, then publishes core **before** electron
-  (electron's `workspace:*` dependency resolves to a concrete version).
-  Bump `version` in both `package.json`s together, then tag.
-
-Packages publish to the private Nocturna registry (`nocturna.dev`).
+  packages, builds, smoke-tests the packed tarballs (installs core from the
+  tarball, verifies electron tarball contents), validates, then publishes
+  core **before** electron (electron's `workspace:*` dependency resolves to
+  a concrete version).
+- To release: `./scripts/release.sh X.Y.Z` bumps both packages, runs the
+  release gate, commits, and tags. Then `git push origin main vX.Y.Z`.
+- Packages publish to the private Nocturna registry (`nocturna.dev`).
+- Document notable changes in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

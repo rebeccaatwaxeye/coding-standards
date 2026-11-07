@@ -154,6 +154,40 @@ jobs:
     condition: SUCCESSFUL
     runAs: 0:0
   - type: CommandStep
+    name: smoke-test
+    runInContainer: true
+    image: node:20-alpine
+    interpreter:
+      type: PosixInterpreter
+      commands: 'set -e
+
+        SMOKE=/tmp/smoke
+
+        rm -rf "$SMOKE"
+
+        mkdir -p "$SMOKE/pkg" "$SMOKE/extracted"
+
+        pnpm --filter @@nocturna/logger pack --pack-destination "$SMOKE"
+
+        pnpm --filter @@nocturna/logger-electron pack --pack-destination "$SMOKE"
+
+        cd "$SMOKE/pkg"
+
+        npm init --yes
+
+        npm install "$SMOKE"/nocturna-logger-*.tgz --no-audit --no-fund --loglevel=error
+
+        node -e "const l=require(''@nocturna/logger'');const log=l.createLogger({module:''smoke'',level:''ERROR'',sinks:[]});log.critical(''ignored'');if(typeof l.consoleSink!==''function''||typeof l.fileSink!==''function''||typeof l.jsonSink!==''function''){process.exit(1);}console.log(''core smoke test passed'');"
+
+        tar -xzf "$SMOKE"/nocturna-logger-electron-*.tgz -C "$SMOKE/extracted"
+
+        node -e "const fs=require(''fs'');const base=''$SMOKE/extracted/package'';const p=require(base+''/package.json'');for(const f of [''dist/index.cjs'',''dist/index.js'',''dist/preload.cjs'',''dist/preload.js'',''dist/index.d.ts'',''dist/preload.d.ts'']){if(!fs.existsSync(base+''/''+f)){console.error(''electron tarball missing ''+f);process.exit(1);}}if(!p.peerDependencies||!p.peerDependencies.electron){console.error(''electron peerDependency missing'');process.exit(1);}console.log(''electron tarball verified: ''+p.version);"
+
+        '
+      shell: sh
+    condition: SUCCESSFUL
+    runAs: 0:0
+  - type: CommandStep
     name: validate
     runInContainer: true
     image: node:20-alpine

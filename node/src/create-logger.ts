@@ -1,4 +1,5 @@
 import { resolveLevel, shouldLog } from './levels.js'
+import { formatMessage, normaliseError } from './message.js'
 import { buildPatterns, redactEntry } from './redact.js'
 import { consoleSink } from './sinks/console.js'
 import type { LogEntry, Logger, LoggerOptions, LogLevel, LogMeta, Sink } from './types.js'
@@ -125,45 +126,4 @@ function getCallerLocation(): string | undefined {
 		}
 	}
 	return undefined
-}
-
-function formatMessage(msg: unknown): string {
-	if (msg === undefined) return ''
-	if (msg === null) return 'null'
-	if (typeof msg === 'string') return msg
-	if (typeof msg === 'number' || typeof msg === 'boolean') return String(msg)
-	if (msg instanceof Error) return msg.message
-	try {
-		return JSON.stringify(msg)
-	} catch {
-		return String(msg)
-	}
-}
-
-function normaliseError(err: unknown): LogEntry['error'] {
-	if (!err) return undefined
-	if (err instanceof Error) {
-		return {
-			name: err.name,
-			message: err.message,
-			stack: err.stack,
-			code: isRecord(err) && typeof err.code === 'string' ? err.code : undefined,
-		}
-	}
-	if (typeof err === 'string') {
-		return { name: 'Error', message: err }
-	}
-	if (isRecord(err)) {
-		return {
-			name: String(err.name ?? 'Error'),
-			message: String(err.message ?? JSON.stringify(err)),
-			stack: typeof err.stack === 'string' ? err.stack : undefined,
-			code: typeof err.code === 'string' ? err.code : undefined,
-		}
-	}
-	return { name: 'Error', message: String(err) }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === 'object' && value !== null
 }
