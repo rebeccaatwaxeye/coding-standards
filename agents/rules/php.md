@@ -10,6 +10,12 @@
 | Formatter | Laravel Pint |
 | Linter | PHPStan (level 8+) |
 
+```neon
+# phpstan.neon — the floor is config-enforced, not convention
+parameters:
+	level: 8
+```
+
 ## Structure
 
 - **One class per file.** PSR-4 autoloading strictly enforced.
@@ -54,6 +60,10 @@ Log::error('payment failed', [
 
 - Context array, never string interpolation: `Log::info("order $id")` is wrong.
 - Never log passwords, tokens, or credentials.
+- Production channels use Monolog's `JsonFormatter` so context becomes structured fields, not interpolated strings.
+- Use the `daily` log driver and set its `days` retention explicitly — logs are rotated daily and pruned after that window.
+- Add a custom Monolog processor that strips secret keys from context before formatting — Laravel ships no redactor.
+- Honour the level contract: `ERROR` production floor via `LOG_LEVEL` (core §9.2).
 - See core `AGENTS.md` §9 for level semantics and the swallowed-error table.
 
 ## Testing

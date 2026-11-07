@@ -12,6 +12,18 @@
 | Docs | `cargo doc` in CI, fail on warnings |
 | Audit | `cargo audit` before adding crates |
 
+```toml
+# Cargo.toml — enforce the error-handling and logging rules at compile time
+[lints.rust]
+unsafe_code = "deny" # an ADR may `allow` it per module
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+```
+
 ## Error Handling
 
 - `thiserror` for library errors, `anyhow` for application glue.
@@ -64,4 +76,14 @@ info!(port = 8000, "server listening");
 - Structured fields, not format strings: `error!("failed: {}", e)` is wrong.
 - `tracing::instrument` on functions worth tracing.
 - Never log secrets or tokens.
+- Wire `tracing-subscriber` with an `EnvFilter`: default `ERROR` in production, `DEBUG` in development (core §9.2).
+- Daily rotation via `tracing-appender` (`RollingFileAppender` + `Rotation::DAILY`) for file output. It does not prune old files — delete them with `logrotate` or a cron job.
+- There is no built-in redaction layer: redact at the call site. Never put secrets in span fields — fields are recorded verbatim.
 - See core `AGENTS.md` §9 for level semantics and the swallowed-error table.
+
+## Testing
+
+- `cargo test`. Unit tests live in `#[cfg(test)] mod tests` beside the code; cross-crate integration tests in `tests/`.
+- Async tests use `#[tokio::test]` — never block a runtime inside a test.
+- Time-dependent code: pause the tokio clock (`tokio::time::pause` + `advance`) — no real sleeps.
+- Do not hit real services — fake the trait boundary.

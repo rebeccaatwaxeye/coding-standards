@@ -12,6 +12,21 @@
 | Validation | `pydantic` v2 at all system boundaries |
 | Lockfile | `uv.lock` (uv) or `poetry.lock` (Poetry) |
 
+```toml
+# pyproject.toml — enforce the rules below
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "TRY", "T20", "PTH"]
+# T20 bans print(); PTH enforces pathlib; B904 enforces raise ... from
+
+[tool.mypy]
+strict = true
+```
+
+## Structure
+
+- One class per file where possible. Max 400 lines per file.
+- Group related modules in packages with explicit `__init__.py` exports.
+
 ## Types
 
 - **Type hints mandatory** on all function signatures and class attributes.
@@ -77,6 +92,9 @@ log.info("server_listening", port=8000)
 - Structured key/values, not f-strings: `log.info(f"order {id}")` is wrong.
 - `exc_info=exc` to attach a traceback — never `str(exc)`.
 - Never log secrets, tokens, or credentials.
+- Configure once at startup with `structlog.configure()`: `JSONRenderer` in production, `ConsoleRenderer` in development.
+- Add a redaction processor to the processor chain so secret keys are stripped before rendering — structlog ships no redactor.
+- Honour the level contract: `ERROR` production floor via `LOG_LEVEL` (core §9.2).
 - See core `AGENTS.md` §9 for level semantics and the swallowed-error table.
 
 ## Testing
@@ -84,3 +102,5 @@ log.info("server_listening", port=8000)
 - `pytest`. Test files as `test_*.py`.
 - Fixtures over setup/teardown methods.
 - `pytest.raises` for error cases; assert on the exception type and message.
+- Do not hit real third-party services — use HTTP fakes.
+- Coverage gate in CI: `pytest --cov --cov-branch --cov-fail-under=90`.

@@ -126,6 +126,7 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
 - **Models:** Business logic extracted to Actions/Observers; models define relationships, casts, scopes, and accessors only.
 - **Validation:** Form Request classes for every non-trivial endpoint. No inline validation in controllers.
 - **APIs:** OpenAPI specs first. Generate frontend types from spec.
+- **Static enforcement:** commit a `phpstan.neon` at level 8+ so the floor is config-enforced, not convention.
 
 ### 8.3 Rust
 
@@ -137,6 +138,8 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
 - **Dependencies:** Prefer the standard library. Audit new crates with `cargo audit`. Pin versions in `Cargo.lock`.
 - **Iterators:** Prefer iterator chains over explicit loops where readability is maintained.
 - **Async:** Prefer `tokio` for async runtimes. Explicitly document `Send`/`Sync` requirements for multi-threaded contexts.
+- **Compile-time enforcement:** in `[lints.rust]` set `unsafe_code = "deny"`; in `[lints.clippy]` deny `unwrap_used`, `expect_used`, `print_stdout`, `print_stderr`. The ADR process may `allow` these per module.
+- **Testing:** unit tests in `#[cfg(test)]` modules beside the code; cross-crate integration tests in `tests/`; async tests with `#[tokio::test]` — never block a runtime inside a test.
 
 ### 8.4 Python
 
@@ -150,6 +153,8 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
   Python projects in general use `pytest`, but the legacy Python pytest suite in this
   repository was removed along with the fetch/compile pipeline (ADR-0010 / ADR-0011 Phase 9).
 - **Structure:** One class per file where possible. Max 400 lines. Group related modules in packages with explicit `__init__.py` exports.
+- **Lint enforcement:** select ruff groups `E, F, I, UP, B, SIM, TRY, T20, PTH` — `T20` bans `print`, `PTH` enforces `pathlib`, `B904` enforces `raise ... from`. Run `mypy` in strict mode in CI.
+- **Coverage:** gate CI on `pytest --cov --cov-branch --cov-fail-under=90`.
 
 ---
 
