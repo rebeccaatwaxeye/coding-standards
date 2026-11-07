@@ -21,9 +21,10 @@ Packages publish to a private OneDev npm registry (`nocturna.dev`), not npmjs. `
 
 1. Edit `CODING_STANDARDS.md` first (canonical — it wins on any disagreement).
 2. Mirror the change into `agents/AGENTS.md` and the relevant `agents/rules/*.md` slice.
-3. Consumers re-run `agents/install.sh` themselves; do not regenerate `.cursorrules` here.
+3. Bump `agents/VERSION` — consumers detect stale installs via `install.sh --status`.
+4. Consumers re-run `agents/install.sh` themselves; do not regenerate `.cursorrules` here.
 
-Note that `install.sh` rewrites relative paths (`rules/X.md` → `agents/rules/X.md`) when copying, so the slice references in `agents/AGENTS.md` are intentionally written as `rules/X.md`.
+Note that `install.sh` rewrites relative paths (`rules/X.md` → `agents/rules/X.md`) when copying, so the slice references in `agents/AGENTS.md` are intentionally written as `rules/X.md`. It writes a version stamp into the installed `AGENTS.md` and records version + languages in `agents/standards.json` in the target repo — the standards version is independent of the logger package versions.
 
 ## Commands
 

@@ -50,9 +50,40 @@ This installs:
 
 | File | Purpose |
 |---|---|
-| `AGENTS.md` | Core rules at repo root, where agents look for it |
+| `AGENTS.md` | Core rules at repo root, where agents look for it (stamped with the standards version) |
 | `agents/rules/*.md` | The selected language slices |
+| `agents/standards.json` | Manifest: standards version + installed languages |
 | `.cursorrules` | Generated: core + selected slices concatenated |
+
+## Versioning
+
+The standards version lives in `agents/VERSION`. `install.sh` stamps it into
+the installed `AGENTS.md` and records it — with the installed languages — in
+`agents/standards.json` in the target repo.
+
+Check whether an installed repo is current (non-zero exit if not):
+
+```bash
+./agents/install.sh --status ../my-api
+# standards: v1.0.0 — UP TO DATE
+#   typescript: OK
+#   python: OK
+#   core AGENTS.md: OK
+#   .cursorrules: OK
+```
+
+`--status` detects three kinds of drift: a **stale version** (source `VERSION`
+is newer), **modified files** (installed copies edited or partially updated),
+and **missing files**. Fix all of them by re-running the install command it
+prints. The exit code makes it CI-friendly:
+
+```bash
+./agents/install.sh --status . || echo "standards out of date — re-run installer"
+```
+
+Bump `VERSION` whenever `AGENTS.md` or any slice changes. The standards
+version is independent of the logger package versions in `node/` and
+`electron/`.
 
 ### Why `.cursorrules` is generated
 
@@ -78,7 +109,9 @@ agents. `.cursorrules` covers Cursor, which predates that convention.
 
 1. Edit the canonical `CODING_STANDARDS.md`.
 2. Mirror the change into `AGENTS.md` and the relevant `rules/*.md`.
-3. Re-run `install.sh` in each consuming repo.
+3. Bump `agents/VERSION`.
+4. Re-run `install.sh` in each consuming repo (or tell them to run
+   `install.sh --status` first).
 
 Both files describe the same rules. If they ever disagree, the canonical
 `CODING_STANDARDS.md` wins — report the discrepancy.
