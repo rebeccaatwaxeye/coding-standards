@@ -319,7 +319,9 @@ jobs:
         set -e
         REGISTRY="@server_url@/@project_path@/~npm/"
         npm config set @@nocturna:registry "$REGISTRY"
-        npm config set -- "//${REGISTRY#*://}:_authToken" "@job_token@"
+        npm config set -- "//${REGISTRY#*://}:username" "@job_token@"
+
+        npm config set -- "//${REGISTRY#*://}:_password" "$(printf '%s' "@job_token@" | base64)"
         # Core first, then electron (its workspace:* dep resolves to a concrete version)
         export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
         corepack enable
