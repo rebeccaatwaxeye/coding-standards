@@ -91,11 +91,48 @@ Agents working in this repo should read [AGENTS.md](AGENTS.md).
 - **Publish** triggers on `v*` tags: checks version parity across **all six** packages
   (`scripts/check-versions.mjs`), builds, smoke-tests the packed TS tarballs, validates, then
   publishes npm core **before** electron (electron's `workspace:*` dependency resolves to a
-  concrete version). Rust/Python/PHP publishing to crates.io/PyPI/Packagist is manual for now.
+  concrete version). Rust/Python/PHP publishing to crates.io/PyPI/Packagist is **intentionally
+  not done** — all three stay internal and are consumed from this git repository (see below).
 - To release: `./scripts/release.sh X.Y.Z` bumps **all six** packages, runs the release gate,
   commits, and tags. Then `git push origin main vX.Y.Z`.
 - Packages publish to the private Nocturna registry (`nocturna.dev`).
 - Document notable changes in [CHANGELOG.md](CHANGELOG.md).
+
+## Installing the Loggers (Internal)
+
+The npm packages come from the OneDev registry. The Rust, Python, and PHP packages have no
+external registry — **git tags are the distribution mechanism**. Pin the tag that matches the
+release you want (`vX.Y.Z`); version parity guarantees every tag carries all six packages.
+
+**Rust** — the repo root is a Cargo workspace, so git dependencies can select the crate:
+
+```toml
+[dependencies]
+nocturna-logger = { git = "https://nocturna.dev/coding-standards.git", tag = "vX.Y.Z", package = "nocturna-logger" }
+nocturna-logger-tauri = { git = "https://nocturna.dev/coding-standards.git", tag = "vX.Y.Z", package = "nocturna-logger-tauri" }
+```
+
+**Python** — pip's subdirectory syntax points at `python/`:
+
+```bash
+pip install "nocturna-logger @ git+https://nocturna.dev/coding-standards.git@vX.Y.Z#subdirectory=python"
+```
+
+**PHP** — a root-level `composer.json` makes the repo resolvable as a Composer VCS package:
+
+```json
+{
+    "repositories": [
+        { "type": "vcs", "url": "https://nocturna.dev/coding-standards.git" }
+    ],
+    "require": {
+        "nocturna/logger": "^X.Y.Z"
+    }
+}
+```
+
+Auth: use the same OneDev credentials you use for git (composer/cargo/pip will prompt or read
+them from your git credential helper).
 
 ## License
 

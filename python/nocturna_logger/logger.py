@@ -191,12 +191,30 @@ def _format_message(message: Any) -> str:
         return str(message)
 
 
-def create_logger(options: LoggerOptions) -> Logger:
+def create_logger(
+    module: str,
+    level: Optional[str] = None,
+    sinks: Optional[List[Any]] = None,
+    redact_additional: Optional[List[Any]] = None,
+    redact_include_defaults: bool = True,
+) -> Logger:
     """Create a structured logger.
 
     - Module name bound once at creation — not repeated per call.
     - Calls are silenced when the entry level < configured minimum.
     - Redaction runs before every sink, always on.
     - The logger never raises; a failing sink is reported to stderr and disabled.
+
+    Example::
+
+        log = create_logger("api", level="DEBUG", sinks=[console_sink()])
     """
-    return Logger(options)
+    return Logger(
+        LoggerOptions(
+            module=module,
+            level=level,
+            sinks=sinks,
+            redact_additional=redact_additional,
+            redact_include_defaults=redact_include_defaults,
+        )
+    )

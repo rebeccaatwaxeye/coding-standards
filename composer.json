@@ -1,0 +1,14 @@
+{
+    "name": "nocturna/logger",
+    "description": "PHP reference implementation of the Nocturna logging spec (§14) — sources live in php/src (this root-level manifest lets Composer VCS installs resolve the package from the repo root)",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nocturna\\Logger\\": "php/src/"
+        }
+    }
+}

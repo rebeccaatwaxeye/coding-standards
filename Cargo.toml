@@ -1,0 +1,6 @@
+# Virtual workspace so git-tag dependencies can resolve the crates inside
+# this repository (cargo only searches the repo root for git dependencies):
+#   nocturna-logger = { git = "https://nocturna.dev/coding-standards.git", tag = "v0.1.1", package = "nocturna-logger" }
+[workspace]
+resolver = "2"
+members = ["rust-cli", "rust-tauri"]
