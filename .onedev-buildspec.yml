@@ -1,4 +1,4 @@
-version: 49
+version: 56
 jobs:
 - name: CI
   steps:
@@ -6,321 +6,306 @@ jobs:
     name: checkout
     cloneCredential:
       type: DefaultCredential
+    withLfs: false
+    withSubmodules: false
     condition: SUCCESSFUL
+    optional: false
   - type: SetupCacheStep
     name: set-up-pnpm-cache
     key: pnpm-store
-    uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
-    condition: SUCCESSFUL
     checksumFiles: pnpm-lock.yaml
     entries:
     - path: /root/.pnpm-store
     - path: node_modules
+    uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: install
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'corepack enable
-
-        pnpm config set store-dir /root/.pnpm-store
-
-        pnpm install --frozen-lockfile
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        corepack enable
+        pnpm config set store-dir /root/.pnpm-store
+        pnpm install --frozen-lockfile
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: lint
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @@nocturna/logger run lint
-
-        pnpm --filter @@nocturna/logger-electron run lint
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        pnpm --filter @@nocturna/logger run lint
+        pnpm --filter @@nocturna/logger-electron run lint
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: build
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @@nocturna/logger run build
-
-        pnpm --filter @@nocturna/logger-electron run build
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        pnpm --filter @@nocturna/logger run build
+        pnpm --filter @@nocturna/logger-electron run build
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: typecheck
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @@nocturna/logger run typecheck
-
-        pnpm --filter @@nocturna/logger-electron run typecheck
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        pnpm --filter @@nocturna/logger run typecheck
+        pnpm --filter @@nocturna/logger-electron run typecheck
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: test
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @@nocturna/logger run test
-
-        pnpm --filter @@nocturna/logger-electron run test
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        pnpm --filter @@nocturna/logger run test
+        pnpm --filter @@nocturna/logger-electron run test
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: rust-lint
     runInContainer: true
     image: rust:1-slim
     interpreter:
       type: PosixInterpreter
-      commands: 'cd rust-cli
-
-        cargo fmt --check
-
-        cargo clippy --all-targets -- -D warnings
-
-        cd ../rust-tauri
-
-        cargo fmt --check
-
-        cargo clippy --all-targets -- -D warnings
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        cd rust-cli
+        cargo fmt --check
+        cargo clippy --all-targets -- -D warnings
+        cd ../rust-tauri
+        cargo fmt --check
+        cargo clippy --all-targets -- -D warnings
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: rust-test
     runInContainer: true
     image: rust:1-slim
     interpreter:
       type: PosixInterpreter
-      commands: 'cd rust-cli
-
-        cargo test
-
-        cd ../rust-tauri
-
-        cargo test
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        cd rust-cli
+        cargo test
+        cd ../rust-tauri
+        cargo test
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: python-lint
     runInContainer: true
     image: python:3.12-slim
     interpreter:
       type: PosixInterpreter
-      commands: 'pip install --quiet ruff
-
-        cd python
-
-        ruff check .
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        pip install --quiet ruff
+        cd python
+        ruff check .
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: python-test
     runInContainer: true
     image: python:3.12-slim
     interpreter:
       type: PosixInterpreter
-      commands: 'pip install --quiet pytest pytest-cov
-
-        cd python
-
-        python -m pytest --cov=nocturna_logger --cov-branch --cov-fail-under=90
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        pip install --quiet pytest pytest-cov
+        cd python
+        python -m pytest --cov=nocturna_logger --cov-branch --cov-fail-under=90
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: php-test
     runInContainer: true
     image: composer:2
     interpreter:
       type: PosixInterpreter
-      commands: 'cd php
-
-        composer install --no-interaction --quiet
-
-        vendor/bin/phpunit
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        cd php
+        composer install --no-interaction --quiet
+        vendor/bin/phpunit
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   triggers:
   - type: BranchUpdateTrigger
     userMatch: anyone
-  timeout: 3600
   retryCondition: never
-  maxRetries: 0
+  maxAttempts: 1
   retryDelay: 30
+  includeUpstreamWhenRebuild: false
+  includeDownstreamWhenRebuild: false
+  timeout: 3600
 - name: Publish
   steps:
   - type: CheckoutStep
     name: checkout
     cloneCredential:
       type: DefaultCredential
+    withLfs: false
+    withSubmodules: false
     condition: SUCCESSFUL
+    optional: false
   - type: SetupCacheStep
     name: set-up-pnpm-cache
     key: pnpm-store
-    uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
-    condition: SUCCESSFUL
     checksumFiles: pnpm-lock.yaml
     entries:
     - path: /root/.pnpm-store
     - path: node_modules
+    uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: install
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'corepack enable
-
-        pnpm config set store-dir /root/.pnpm-store
-
-        pnpm install --frozen-lockfile
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        corepack enable
+        pnpm config set store-dir /root/.pnpm-store
+        pnpm install --frozen-lockfile
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: check-versions
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'node -e "const fs=require(''fs'');const json=(p)=>JSON.parse(fs.readFileSync(p,''utf8''));const toml=(p)=>fs.readFileSync(p,''utf8'').match(/^version\s*=\s*''([^'']+)'')/m[1];const v=[[''@nocturna/logger'',json(''node/package.json'').version],[''@nocturna/logger-electron'',json(''electron/package.json'').version],[''nocturna-logger (rust)'',toml(''rust-cli/Cargo.toml'')],[''nocturna-logger-tauri'',toml(''rust-tauri/Cargo.toml'')],[''nocturna-logger (python)'',json(''python/pyproject.toml'').project.version],[''nocturna/logger (php)'',json(''php/composer.json'').version]];const bad=v.filter(([,x])=>x!==v[0][1]);if(bad.length){console.error(''version mismatch across packages:''+v.map(([n,x])=>''\n  ''+n+''='' +x).join(''''));process.exit(1);}console.log(''all package versions aligned: ''+v[0][1]);"
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        node -e "const fs=require('fs');const json=(p)=>JSON.parse(fs.readFileSync(p,'utf8'));const toml=(p)=>fs.readFileSync(p,'utf8').match(/^version\s*=\s*'([^']+)')/m[1];const v=[['@nocturna/logger',json('node/package.json').version],['@nocturna/logger-electron',json('electron/package.json').version],['nocturna-logger (rust)',toml('rust-cli/Cargo.toml')],['nocturna-logger-tauri',toml('rust-tauri/Cargo.toml')],['nocturna-logger (python)',json('python/pyproject.toml').project.version],['nocturna/logger (php)',json('php/composer.json').version]];const bad=v.filter(([,x])=>x!==v[0][1]);if(bad.length){console.error('version mismatch across packages:'+v.map(([n,x])=>'\n  '+n+'=' +x).join(''));process.exit(1);}console.log('all package versions aligned: '+v[0][1]);"
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: build
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @@nocturna/logger run build
-
-        pnpm --filter @@nocturna/logger-electron run build
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        pnpm --filter @@nocturna/logger run build
+        pnpm --filter @@nocturna/logger-electron run build
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: smoke-test
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'set -e
-
-        SMOKE=/tmp/smoke
-
-        rm -rf "$SMOKE"
-
-        mkdir -p "$SMOKE/pkg" "$SMOKE/extracted"
-
-        pnpm --filter @@nocturna/logger pack --pack-destination "$SMOKE"
-
-        pnpm --filter @@nocturna/logger-electron pack --pack-destination "$SMOKE"
-
-        cd "$SMOKE/pkg"
-
-        npm init --yes
-
-        npm install "$SMOKE"/nocturna-logger-*.tgz --no-audit --no-fund --loglevel=error
-
-        node -e "const l=require(''@nocturna/logger'');const log=l.createLogger({module:''smoke'',level:''ERROR'',sinks:[]});log.critical(''ignored'');if(typeof l.consoleSink!==''function''||typeof l.fileSink!==''function''||typeof l.jsonSink!==''function''){process.exit(1);}console.log(''core smoke test passed'');"
-
-        tar -xzf "$SMOKE"/nocturna-logger-electron-*.tgz -C "$SMOKE/extracted"
-
-        node -e "const fs=require(''fs'');const base=''$SMOKE/extracted/package'';const p=require(base+''/package.json'');for(const f of [''dist/index.cjs'',''dist/index.js'',''dist/preload.cjs'',''dist/preload.js'',''dist/index.d.ts'',''dist/preload.d.ts'']){if(!fs.existsSync(base+''/''+f)){console.error(''electron tarball missing ''+f);process.exit(1);}}if(!p.peerDependencies||!p.peerDependencies.electron){console.error(''electron peerDependency missing'');process.exit(1);}console.log(''electron tarball verified: ''+p.version);"
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        set -e
+        SMOKE=/tmp/smoke
+        rm -rf "$SMOKE"
+        mkdir -p "$SMOKE/pkg" "$SMOKE/extracted"
+        pnpm --filter @@nocturna/logger pack --pack-destination "$SMOKE"
+        pnpm --filter @@nocturna/logger-electron pack --pack-destination "$SMOKE"
+        cd "$SMOKE/pkg"
+        npm init --yes
+        npm install "$SMOKE"/nocturna-logger-*.tgz --no-audit --no-fund --loglevel=error
+        node -e "const l=require('@@nocturna/logger');const log=l.createLogger({module:'smoke',level:'ERROR',sinks:[]});log.critical('ignored');if(typeof l.consoleSink!=='function'||typeof l.fileSink!=='function'||typeof l.jsonSink!=='function'){process.exit(1);}console.log('core smoke test passed');"
+        tar -xzf "$SMOKE"/nocturna-logger-electron-*.tgz -C "$SMOKE/extracted"
+        node -e "const fs=require('fs');const base='$SMOKE/extracted/package';const p=require(base+'/package.json');for(const f of ['dist/index.cjs','dist/index.js','dist/preload.cjs','dist/preload.js','dist/index.d.ts','dist/preload.d.ts']){if(!fs.existsSync(base+'/'+f)){console.error('electron tarball missing '+f);process.exit(1);}}if(!p.peerDependencies||!p.peerDependencies.electron){console.error('electron peerDependency missing');process.exit(1);}console.log('electron tarball verified: '+p.version);"
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: validate
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'pnpm --filter @@nocturna/logger run typecheck
-
-        pnpm --filter @@nocturna/logger-electron run typecheck
-
-        pnpm --filter @@nocturna/logger run test
-
-        pnpm --filter @@nocturna/logger-electron run test
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        pnpm --filter @@nocturna/logger run typecheck
+        pnpm --filter @@nocturna/logger-electron run typecheck
+        pnpm --filter @@nocturna/logger run test
+        pnpm --filter @@nocturna/logger-electron run test
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   - type: CommandStep
     name: publish
     runInContainer: true
     image: node:20-alpine
     interpreter:
       type: PosixInterpreter
-      commands: 'set -e
-
-        REGISTRY="@server_url@/@project_path@/~npm/"
-
-        npm config set @@nocturna:registry "$REGISTRY"
-
-        npm config set -- "//${REGISTRY#*://}:_authToken" "@job_token@:@secret:access-token@"
-
-        # Core first, then electron (its workspace:* dep resolves to a concrete version)
-
-        pnpm --filter @@nocturna/logger publish --no-git-checks
-
-        pnpm --filter @@nocturna/logger-electron publish --no-git-checks
-
-        '
       shell: sh
-    condition: SUCCESSFUL
+      commands: |
+        set -e
+        REGISTRY="@server_url@/@project_path@/~npm/"
+        npm config set @@nocturna:registry "$REGISTRY"
+        npm config set -- "//${REGISTRY#*://}:_authToken" "@job_token@:@secret:access-token@"
+        # Core first, then electron (its workspace:* dep resolves to a concrete version)
+        pnpm --filter @@nocturna/logger publish --no-git-checks
+        pnpm --filter @@nocturna/logger-electron publish --no-git-checks
     runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   triggers:
   - type: TagCreateTrigger
     tags: v*
-  timeout: 1800
   retryCondition: never
-  maxRetries: 0
+  maxAttempts: 1
   retryDelay: 30
+  includeUpstreamWhenRebuild: false
+  includeDownstreamWhenRebuild: false
+  timeout: 1800
