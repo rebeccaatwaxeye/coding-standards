@@ -1,6 +1,6 @@
 {
   "name": "@nocturna/logger",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Zero-dependency structured logger for Node and the browser",
   "type": "module",
   "exports": {
