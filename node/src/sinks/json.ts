@@ -11,6 +11,8 @@ export interface JsonSinkOptions {
 	output?: 'stdout' | 'file'
 	/** File path when output is `file`. Default: `./logs/structured.jsonl` */
 	filePath?: string
+	/** Write stream for `stdout` mode. Default: `process.stdout` (injectable for tests). */
+	stream?: NodeJS.WriteStream
 }
 
 /**
@@ -24,11 +26,13 @@ export interface JsonSinkOptions {
  */
 export function jsonSink(options: JsonSinkOptions = {}): Sink {
 	const output = options.output ?? 'stdout'
+	const streamOption = options.stream
 
 	if (output === 'stdout') {
+		const stream = streamOption ?? process.stdout
 		return {
 			write(entry: LogEntry) {
-				process.stdout.write(formatJson(entry))
+				stream.write(formatJson(entry))
 			},
 		}
 	}

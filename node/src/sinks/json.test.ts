@@ -15,26 +15,32 @@ function makeEntry(overrides: Partial<LogEntry> = {}): LogEntry {
 	}
 }
 
+// In-memory write stream — avoids spying on process.stdout entirely.
+function memoryStream(): NodeJS.WriteStream & { writes: string[] } {
+	const writes: string[] = []
+	return {
+		writes,
+		write(chunk: string | Uint8Array): boolean {
+			writes.push(String(chunk))
+			return true
+		},
+	} as unknown as NodeJS.WriteStream & { writes: string[] }
+}
+
 describe('jsonSink (stdout)', () => {
-	const stdoutWrite = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
-
-	afterEach(() => {
-		stdoutWrite.mockClear()
-	})
-
 	it('writes one JSON line per entry', () => {
-		const sink = jsonSink()
+		const stream = memoryStream()
+		const sink = jsonSink({ stream })
 		sink.write(makeEntry())
 		sink.write(makeEntry({ level: 'ERROR', message: 'boom' }))
 
-		expect(stdoutWrite).toHaveBeenCalledTimes(2)
-		const lines = stdoutWrite.mock.calls.map((c) => c[0] as string)
-		for (const line of lines) {
+		expect(stream.writes).toHaveLength(2)
+		for (const line of stream.writes) {
 			expect(line.endsWith('\n')).toBe(true)
 			expect(() => JSON.parse(line)).not.toThrow()
 		}
-		expect(JSON.parse(lines[0]!).module).toBe('api')
-		expect(JSON.parse(lines[1]!).level).toBe('ERROR')
+		expect(JSON.parse(stream.writes[0]!).module).toBe('api')
+		expect(JSON.parse(stream.writes[1]!).level).toBe('ERROR')
 	})
 })
 
