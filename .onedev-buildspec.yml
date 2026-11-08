@@ -58,8 +58,10 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
-        pnpm --filter @@nocturna/logger run lint
-        pnpm --filter @@nocturna/logger-electron run lint
+        cd node
+        node_modules/.bin/biome check src/
+        cd ../electron
+        node_modules/.bin/biome check src/
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -72,8 +74,10 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
-        pnpm --filter @@nocturna/logger run build
-        pnpm --filter @@nocturna/logger-electron run build
+        cd node
+        node_modules/.bin/tsup
+        cd ../electron
+        node_modules/.bin/tsup
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -86,8 +90,10 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
-        pnpm --filter @@nocturna/logger run typecheck
-        pnpm --filter @@nocturna/logger-electron run typecheck
+        cd node
+        node_modules/.bin/tsc --noEmit
+        cd ../electron
+        node_modules/.bin/tsc --noEmit
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -100,8 +106,10 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
-        pnpm --filter @@nocturna/logger run test
-        pnpm --filter @@nocturna/logger-electron run test
+        cd node
+        node_modules/.bin/vitest run --coverage
+        cd ../electron
+        node_modules/.bin/vitest run --coverage
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -252,6 +260,8 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+        corepack enable
         pnpm --filter @@nocturna/logger run build
         pnpm --filter @@nocturna/logger-electron run build
     runAs: 0:0
@@ -270,6 +280,8 @@ jobs:
         SMOKE=/tmp/smoke
         rm -rf "$SMOKE"
         mkdir -p "$SMOKE/pkg" "$SMOKE/extracted"
+        export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+        corepack enable
         pnpm --filter @@nocturna/logger pack --pack-destination "$SMOKE"
         pnpm --filter @@nocturna/logger-electron pack --pack-destination "$SMOKE"
         cd "$SMOKE/pkg"
@@ -290,9 +302,13 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+        corepack enable
         pnpm --filter @@nocturna/logger run typecheck
         pnpm --filter @@nocturna/logger-electron run typecheck
         pnpm --filter @@nocturna/logger run test
+        export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+        corepack enable
         pnpm --filter @@nocturna/logger-electron run test
     runAs: 0:0
     useTTY: true
@@ -311,6 +327,8 @@ jobs:
         npm config set @@nocturna:registry "$REGISTRY"
         npm config set -- "//${REGISTRY#*://}:_authToken" "@job_token@:@secret:access-token@"
         # Core first, then electron (its workspace:* dep resolves to a concrete version)
+        export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+        corepack enable
         pnpm --filter @@nocturna/logger publish --no-git-checks
         pnpm --filter @@nocturna/logger-electron publish --no-git-checks
     runAs: 0:0
