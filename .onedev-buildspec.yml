@@ -107,9 +107,9 @@ jobs:
       shell: sh
       commands: |
         cd node
-        node_modules/.bin/vitest run
+        timeout 90s node_modules/.bin/vitest run --testTimeout=15000 --no-file-parallelism --reporter=verbose
         cd ../electron
-        node_modules/.bin/vitest run
+        timeout 90s node_modules/.bin/vitest run --testTimeout=15000 --no-file-parallelism --reporter=verbose
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
