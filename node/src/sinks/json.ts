@@ -59,8 +59,21 @@ export function jsonSink(options: JsonSinkOptions = {}): Sink {
 }
 
 function ensureDir(dir: string): void {
-	if (!existsSync(dir)) {
-		mkdirSync(dir, { recursive: true })
+	if (existsSync(dir)) {
+		return
+	}
+	try {
+		mkdirSync(dir)
+	} catch (err) {
+		// Recursive mkdirSync hangs on musl when an ancestor is not
+		// writable (e.g. EPERM under procfs) — create one level at a
+		// time so unwritable ancestors throw instead of blocking.
+		if ((err as NodeJS.ErrnoException).code === 'ENOENT' && dir !== dirname(dir)) {
+			ensureDir(dirname(dir))
+			mkdirSync(dir)
+		} else {
+			throw err
+		}
 	}
 }
 
