@@ -12,7 +12,15 @@ categories = ["development-tools::debugging"]
 nocturna-logger = { path = "../rust-cli", version = "0.1.1" }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
-tauri = { version = "2", default-features = false }
+# Optional: enable the "tauri" feature for the AppHandle file-sink wrapper
+# and the #[tauri::command] entry point. Tauri's Linux dependency tree
+# (gtk/webkit sys crates) needs pkg-config + system libraries to build,
+# so it stays off by default — the pure logic (handle_log_payload) and
+# the version-parity tests never require it.
+tauri = { version = "2", optional = true, default-features = false }
+
+[features]
+tauri = ["dep:tauri"]
 
 [lints.rust]
 unsafe_code = "deny"

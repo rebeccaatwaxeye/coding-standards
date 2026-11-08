@@ -3,7 +3,7 @@
 //! Dependency direction is one-way: the core crate (`nocturna-logger`)
 //! never depends on Tauri; this crate depends on the core.
 //!
-//! ```no_run
+//! ```ignore
 //! # use nocturna_logger::{console_sink, create_logger, LoggerOptions};
 //! # use nocturna_logger_tauri::{set_log_handler_factory, tauri_file_sink};
 //! # use std::sync::Arc;
@@ -28,9 +28,12 @@
 mod ipc_handler;
 mod tauri_file_sink;
 
+#[cfg(feature = "tauri")]
+pub use ipc_handler::nocturna_log;
 pub use ipc_handler::{
-    handle_log_payload, nocturna_log, set_log_handler_factory, LogIpcPayload, IPC_LOG_CHANNEL,
+    handle_log_payload, set_log_handler_factory, LogIpcPayload, IPC_LOG_CHANNEL,
 };
+#[cfg(feature = "tauri")]
 pub use tauri_file_sink::{default_log_dir, tauri_file_sink};
 
 // Re-export the core so consumer apps need only this crate.

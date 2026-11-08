@@ -137,10 +137,12 @@ pub fn handle_log_payload(payload: LogIpcPayload) {
     }
 }
 
-/// Tauri command — register with `tauri::Builder::invoke_handler(tauri::generate_handler![
+/// Tauri command — requires the `tauri` feature. Register with
+/// `tauri::Builder::invoke_handler(tauri::generate_handler![
 /// nocturna_logger_tauri::nocturna_log ])`.
 ///
 /// Webview side: `invoke('nocturna_log', { payload: {...} })`
+#[cfg(feature = "tauri")]
 #[tauri::command]
 pub fn nocturna_log(payload: LogIpcPayload) {
     handle_log_payload(payload);

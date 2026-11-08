@@ -1,3 +1,4 @@
+#![cfg(feature = "tauri")]
 //! Tauri file sink — uses `app_data_dir()` as the default directory.
 //!
 //! This is a convenience wrapper around the core `file_sink()` with the
