@@ -12,7 +12,7 @@ import sys
 import time
 from dataclasses import dataclass
 from types import FrameType
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from .levels import resolve_level, should_log
 from .redact import build_patterns, redact_data
@@ -192,10 +192,10 @@ def _format_message(message: Any) -> str:
 
 
 def create_logger(
-    module: str,
+    module: Union[str, LoggerOptions],
     level: Optional[str] = None,
-    sinks: Optional[List[Any]] = None,
-    redact_additional: Optional[List[Any]] = None,
+    sinks: Optional[list] = None,
+    redact_additional: Optional[list] = None,
     redact_include_defaults: bool = True,
 ) -> Logger:
     """Create a structured logger.
@@ -208,7 +208,12 @@ def create_logger(
     Example::
 
         log = create_logger("api", level="DEBUG", sinks=[console_sink()])
+
+    Also accepts a pre-built ``LoggerOptions``:
+    ``create_logger(LoggerOptions(module="api", level="DEBUG"))``.
     """
+    if isinstance(module, LoggerOptions):
+        return Logger(module)
     return Logger(
         LoggerOptions(
             module=module,
