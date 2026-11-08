@@ -17,6 +17,7 @@ jobs:
     entries:
     - path: /root/.pnpm-store
     - path: node_modules
+    - path: /root/.cache/node/corepack
     uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
     condition: SUCCESSFUL
     optional: false
@@ -196,6 +197,7 @@ jobs:
     entries:
     - path: /root/.pnpm-store
     - path: node_modules
+    - path: /root/.cache/node/corepack
     uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
     condition: SUCCESSFUL
     optional: false
@@ -222,7 +224,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
-        node -e "const fs=require('fs');const json=(p)=>JSON.parse(fs.readFileSync(p,'utf8'));const toml=(p)=>fs.readFileSync(p,'utf8').match(/^version\s*=\s*'([^']+)')/m[1];const v=[['@nocturna/logger',json('node/package.json').version],['@nocturna/logger-electron',json('electron/package.json').version],['nocturna-logger (rust)',toml('rust-cli/Cargo.toml')],['nocturna-logger-tauri',toml('rust-tauri/Cargo.toml')],['nocturna-logger (python)',json('python/pyproject.toml').project.version],['nocturna/logger (php)',json('php/composer.json').version]];const bad=v.filter(([,x])=>x!==v[0][1]);if(bad.length){console.error('version mismatch across packages:'+v.map(([n,x])=>'\n  '+n+'=' +x).join(''));process.exit(1);}console.log('all package versions aligned: '+v[0][1]);"
+        node scripts/check-versions.mjs
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
