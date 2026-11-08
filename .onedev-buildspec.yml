@@ -29,6 +29,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         node -e "const t=(u)=>Promise.race([fetch(u,{redirect:'manual'}).then(r=>'HTTP '+r.status),new Promise((_,re)=>setTimeout(()=>re(new Error('TIMEOUT-8s')),8000))]).catch(e=>e.message);Promise.all([t('https://registry.npmjs.org/pnpm'),t('https://nocturna.dev/coding-standards/~npm/pnpm'),t('https://nocturna.dev')]).then(r=>console.log('REACHABILITY '+r.join(' | '))).catch(e=>console.log('PROBE-FAIL',e.message))"
     runAs: 0:0
     useTTY: true
@@ -42,6 +43,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
         corepack enable
         pnpm config set store-dir /root/.pnpm-store
@@ -58,6 +60,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         cd node
         node_modules/.bin/biome check src/
         cd ../electron
@@ -74,6 +77,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         cd node
         node_modules/.bin/tsup
         cd ../electron
@@ -90,6 +94,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         cd node
         node_modules/.bin/tsc --noEmit
         cd ../electron
@@ -106,6 +111,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         cd node
         timeout 90s node_modules/.bin/vitest run --testTimeout=15000 --no-file-parallelism --reporter=verbose
         cd ../electron
@@ -122,6 +128,8 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
+        rustup component add rustfmt clippy
         cd rust-cli
         cargo fmt --check
         cargo clippy --all-targets -- -D warnings
@@ -140,6 +148,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         cd rust-cli
         cargo test
         cd ../rust-tauri
@@ -156,6 +165,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         pip install --quiet ruff
         cd python
         ruff check .
@@ -171,6 +181,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         pip install --quiet pytest pytest-cov
         cd python
         python -m pytest --cov=nocturna_logger --cov-branch --cov-fail-under=90
@@ -186,6 +197,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         cd php
         composer install --no-interaction --quiet
         vendor/bin/phpunit
@@ -231,6 +243,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
         corepack enable
         pnpm config set store-dir /root/.pnpm-store
@@ -247,6 +260,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         node scripts/check-versions.mjs
     runAs: 0:0
     useTTY: true
@@ -260,6 +274,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
         corepack enable
         pnpm --filter @@nocturna/logger run build
@@ -302,6 +317,7 @@ jobs:
       type: PosixInterpreter
       shell: sh
       commands: |
+        set -e
         export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
         corepack enable
         pnpm --filter @@nocturna/logger run typecheck
