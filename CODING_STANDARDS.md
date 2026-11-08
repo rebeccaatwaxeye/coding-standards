@@ -427,6 +427,19 @@ not limp along in an unknown state.
 - Main-process global handlers per §14.8
 - `electron` declared as a **`peerDependency`**
 
+**Reference implementations for other stacks** — each mirrors the TS contract and formats
+byte-for-byte; parity fixtures are asserted in every language's test suite:
+
+| Package | Stack | Notes |
+|---|---|---|
+| `nocturna-logger` (crates.io, `rust-cli/`) | Rust CLI / server | `create_logger(LoggerOptions)`, `#[track_caller]` locations, panic hook per §14.8; deps: chrono, regex, serde_json |
+| `nocturna-logger-tauri` (crates.io, `rust-tauri/`) | Rust + Tauri desktop | file sink defaults to `app_data_dir()/logs` (7-day retention), webview→main IPC command `nocturna_log` with per-module logger cache |
+| `nocturna-logger` (PyPI, `python/`) | Python | `create_logger(module, ...)`, `sys.excepthook` + `threading.excepthook` handlers per §14.8; stdlib only |
+| `nocturna/logger` (Packagist, `php/`) | PHP 8.1+ | `LoggerFactory::create(LoggerOptions)`, `$log(...)` invoke shorthand, exception/error/shutdown handlers per §14.8; ext-json only |
+
+All six packages share one version across releases (enforced by the version-parity check in CI
+and `scripts/check-versions.mjs`).
+
 > **Dependency direction is one-way:** the core package must never import Electron. This is the same
 > rule as Nebula's `src/core/` (which expresses host needs through `ports.ts`) and dnd-platform §13
 > (handlers report through the `JobProgressReporter` service, never writing storage directly).
@@ -437,8 +450,11 @@ All TypeScript and JavaScript projects — Node, browser, Vite, Nuxt, SvelteKit,
 `@nocturna/logger` directly. The package ships CJS, ESM, and type declarations, so it works
 even in pure-JavaScript Node projects without a build step.
 
-For stacks that are genuinely not JavaScript, implement §14.3's contract with the
-language-idiomatic library already mandated in §10:
+For stacks that are genuinely not JavaScript, use the reference implementation for that stack
+(§14.9): `nocturna-logger` (Rust), `nocturna-logger-tauri` (Tauri), `nocturna-logger` (Python),
+or `nocturna/logger` (PHP). If a project must use the language-idiomatic library instead
+(tracing, structlog, monolog), it must implement §14.3's contract with the same level set,
+the same `ERROR` production floor, and the same no-swallowed-errors rules:
 
 | Stack | Library | Notes |
 |-------|---------|-------|

@@ -8,10 +8,14 @@ This repository is **not a normal application**. It contains two distinct delive
    - `CODING_STANDARDS.md` — the canonical, human-written standards document (~460 lines, §-numbered sections). **This is the source of truth.**
    - `agents/` — an agent-optimised rewrite of the same standards: `agents/AGENTS.md` (core rules), `agents/rules/{typescript,php,rust,python}.md` (lazy-loaded language slices), and `agents/install.sh` (copies them into *other* repos and generates `.cursorrules`).
 
-2. **The reference implementation** of the standards' structured-logging spec (§14.9), as a pnpm workspace:
+2. **The reference implementations** of the standards' structured-logging spec (§14.9) — one per stack, all sharing one version per release and producing **byte-identical output** (parity fixtures asserted in every test suite):
    - `node/` → `@nocturna/logger` — zero-dependency core logger (Node + browser)
    - `electron/` → `@nocturna/logger-electron` — IPC bridge, file sink, global handlers
    - `node/configs/` → shippable lint config snippets (`@nocturna/logger/configs` export) enforcing §14.4
+   - `rust-cli/` → `nocturna-logger` (Rust crate) — core; deps: chrono, regex, serde_json
+   - `rust-tauri/` → `nocturna-logger-tauri` — app-data sink (7-day retention), webview→main IPC command `nocturna_log`, re-exports the core
+   - `python/` → `nocturna-logger` (PyPI-style, stdlib only) — `create_logger`, excepthook handlers
+   - `php/` → `nocturna/logger` (Composer, ext-json only) — `LoggerFactory::create`, `$log(...)` shorthand
 
 Packages publish to a private OneDev npm registry (`nocturna.dev`), not npmjs. `README.md` covers the same ground for humans; this file focuses on what agents trip over.
 
@@ -41,9 +45,21 @@ pnpm format
 
 The build-chaining matters: electron resolves `@nocturna/logger` types and runtime through core's `dist/` output. Equivalent per-package commands (`pnpm --filter @nocturna/logger-electron <script>`) also exist (build, test, test:watch, typecheck, lint, format).
 
-Before finishing any change, run lint, build, typecheck, and test — that is what CI (`.onedev-buildspec.yml`, OneDev) does on every branch update, in the order lint → build → typecheck → test. A husky pre-commit hook runs `pnpm -r run lint` as a commit-time gate.
+Other languages have no root scripts — run them in their directories:
 
-Releases: `./scripts/release.sh X.Y.Z` bumps both packages, runs lint/build/test, commits `chore(release): vX.Y.Z`, and creates the tag. Pushing the tag triggers Publish.
+```bash
+(cd rust-cli && cargo test && cargo clippy --all-targets -- -D warnings && cargo fmt --check)
+(cd rust-tauri && cargo test)          # depends on rust-cli via path; tauri is default-features=false
+(cd python && python -m pytest --cov=nocturna_logger --cov-branch --cov-fail-under=90)
+(cd python && ruff check .)            # §8.4 slice config lives in pyproject.toml
+(cd php && composer install && vendor/bin/phpunit)
+```
+
+Before finishing any change, run lint, build, typecheck, and test for the packages you touched — that is what CI (`.onedev-buildspec.yml`, OneDev) does on every branch update: npm lint → build → typecheck → test, then rust-lint → rust-test → python-lint → python-test → php-test. A husky pre-commit hook runs `pnpm -r run lint` as a commit-time gate.
+
+Releases: `./scripts/release.sh X.Y.Z` bumps **all six** package manifests (npm ×2, Cargo ×2, pyproject, composer), runs the TS release gate, commits `chore(release): vX.Y.Z`, and creates the tag. `scripts/check-versions.mjs` (run by the Publish job) fails the release if any manifest drifts. Pushing the tag triggers Publish — npm packages publish automatically; Rust/Python/PHP publishing is manual for now.
+
+**Rust parity rules:** every language's `format_*`/sink behaviour mirrors `node/src/format.ts` and `node/src/create-logger.ts` — when changing a format, update the parity fixtures in ALL languages' test suites (they assert the same expected strings). SILENT-as-disable-switch, sink-failure disabling, and mandatory redaction are load-bearing invariants, not implementation details.
 
 ### CI / Publishing Gotchas
 
@@ -70,7 +86,7 @@ Non-obvious invariants baked into the design:
 - Callers never format output; **sinks own formatting** (`format.ts`: plain-text for files, JSONL for structured, ANSI for Node console, CSS-badge args for browser console).
 - `LogError` preserves `{ name, message, stack, code }` — never `String(err)`.
 - Source imports use **`.js` extensions** inside `.ts` files (`./types.js`) — required for the dual cjs/esm tsup build. Follow this pattern in new files.
-- Dependency direction is **one-way**: core (`node/`) must never import Electron or anything Electron-specific; `electron/` depends on core via `workspace:*` and declares `electron >= 20` as a peerDependency.
+- Dependency direction is **one-way** in every host pair: core (`node/`) must never import Electron; `electron/` depends on core via `workspace:*`; `rust-tauri/` depends on `rust-cli` via path (tauri is default-features=false, so no webkit system libs are needed to build/test).
 
 ### Electron data flow (`electron/`)
 

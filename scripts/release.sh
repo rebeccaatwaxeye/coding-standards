@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# One-command release: bump both packages, verify, commit, tag.
+# One-command release: bump all six packages, verify, commit, tag.
 #
 # Usage:
 #   ./scripts/release.sh <semver>     e.g. ./scripts/release.sh 1.2.3
@@ -32,14 +32,28 @@ if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
   exit 1
 fi
 
-echo "Bumping both packages to $VERSION ..."
+echo "Bumping all six packages to $VERSION ..."
 node -e "
 const fs = require('fs');
-for (const p of ['node/package.json', 'electron/package.json']) {
+const files = [
+  'node/package.json',
+  'electron/package.json',
+  'php/composer.json',
+];
+for (const p of files) {
   const json = JSON.parse(fs.readFileSync(p, 'utf8'));
   json.version = '$VERSION';
   fs.writeFileSync(p, JSON.stringify(json, null, 2) + '\n');
 }
+for (const p of ['rust-cli/Cargo.toml', 'rust-tauri/Cargo.toml']) {
+  let s = fs.readFileSync(p, 'utf8');
+  s = s.replace(/^version = \"[^\"]+\"/m, 'version = \"$VERSION\"');
+  fs.writeFileSync(p, s);
+}
+const pyproj = 'python/pyproject.toml';
+let py = fs.readFileSync(pyproj, 'utf8');
+py = py.replace(/^version = \"[^\"]+\"/m, 'version = \"$VERSION\"');
+fs.writeFileSync(pyproj, py);
 "
 
 echo "Running release gate: lint, build, test ..."
@@ -47,7 +61,7 @@ pnpm -r run lint
 pnpm -r run build
 pnpm -r run test
 
-git add node/package.json electron/package.json
+git add node/package.json electron/package.json rust-cli/Cargo.toml rust-tauri/Cargo.toml python/pyproject.toml php/composer.json
 git commit -m "chore(release): v$VERSION"
 git tag -a "v$VERSION" -m "Release v$VERSION"
 

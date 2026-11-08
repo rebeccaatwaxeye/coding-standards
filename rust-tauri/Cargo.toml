@@ -1,0 +1,25 @@
+[package]
+name = "nocturna-logger-tauri"
+version = "0.1.1"
+edition = "2021"
+description = "Tauri-specific logger extensions — app-data file sink, IPC bridge, and panic handlers for the Nocturna logging spec"
+license = "MIT"
+repository = "https://github.com/nocturna/logger"
+keywords = ["logger", "tauri", "ipc", "structured"]
+categories = ["development-tools::debugging"]
+
+[dependencies]
+nocturna-logger = { path = "../rust-cli", version = "0.1.1" }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+tauri = { version = "2", default-features = false }
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+dbg_macro = "deny"

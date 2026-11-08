@@ -3,3 +3,10 @@ dist/
 coverage/
 *.tsbuildinfo
 .DS_Store
+target/
+__pycache__/
+*.pyc
+.venv/
+vendor/
+.phpunit.result.cache
+php/phpunit.phar

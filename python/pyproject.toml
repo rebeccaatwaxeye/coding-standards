@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nocturna-logger"
+version = "0.1.1"
+description = "Zero-config structured logger for Python — reference implementation of the Nocturna logging spec (§14)"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[tool.setuptools]
+packages = ["nocturna_logger"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "TRY", "T20", "PTH"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["TRY003", "TRY301", "TRY400", "PTH"]

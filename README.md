@@ -14,11 +14,18 @@ This repository contains two related deliverables:
 ├── agents/                 Agent-optimised standards distribution
 │   ├── AGENTS.md           Core rules, installed into consumer repos
 │   ├── rules/              Language slices: typescript, php, rust, python
-│   └── install.sh          Installer — copies rules + generates .cursorrules
+│   └── install.sh          Installer — versioned, copies rules + generates .cursorrules
 ├── node/                   @nocturna/logger — zero-dependency core (Node + browser)
 │   └── configs/            Shippable lint configs enforcing §14.4
-└── electron/               @nocturna/logger-electron — IPC bridge, file sink, global handlers
+├── electron/               @nocturna/logger-electron — IPC bridge, file sink, global handlers
+├── rust-cli/               nocturna-logger (Rust) — core, byte-identical output
+├── rust-tauri/             nocturna-logger-tauri — Tauri app-data sink + IPC bridge
+├── python/                 nocturna-logger (Python) — stdlib-only core
+└── php/                    nocturna/logger (PHP) — ext-json only
 ```
+
+All six logger packages share one version per release (checked by `scripts/check-versions.mjs`)
+and produce byte-identical output — format parity fixtures are asserted in every test suite.
 
 ## Standards
 
@@ -39,8 +46,9 @@ into `agents/AGENTS.md` and the relevant `agents/rules/*.md`.
 
 | Package | Description |
 |---|---|
-| `@nocturna/logger` | Structured logger: levels, mandatory redaction, console/file/JSON sinks, daily rotation + retention. Zero runtime dependencies. |
+| `@nocturna/logger` / `nocturna-logger` / `nocturna-logger` / `nocturna/logger` | Structured logger: levels, mandatory redaction, console/file/JSON sinks, daily rotation + retention. TypeScript is zero-dep; Rust uses chrono + regex + serde_json; Python and PHP are stdlib/ext-json only. |
 | `@nocturna/logger-electron` | Electron extensions: `userData` file sink, renderer→main IPC bridge, per-module renderer loggers, global error handlers. |
+| `nocturna-logger-tauri` | Tauri extensions: `app_data_dir()` file sink (7-day retention), webview→main IPC command, panic handler. |
 
 ```ts
 import { createLogger, consoleSink, fileSink } from '@nocturna/logger'
@@ -78,14 +86,14 @@ Agents working in this repo should read [AGENTS.md](AGENTS.md).
 ## CI & Publishing
 
 - **CI** (OneDev, `.onedev-buildspec.yml`) runs on every branch update:
-  lint → build → typecheck → test for both packages.
-- **Publish** triggers on `v*` tags: checks version parity between the two
-  packages, builds, smoke-tests the packed tarballs (installs core from the
-  tarball, verifies electron tarball contents), validates, then publishes
-  core **before** electron (electron's `workspace:*` dependency resolves to
-  a concrete version).
-- To release: `./scripts/release.sh X.Y.Z` bumps both packages, runs the
-  release gate, commits, and tags. Then `git push origin main vX.Y.Z`.
+  npm lint → build → typecheck → test, then Rust lint/test, Python lint/test (90% gate),
+  and PHP PHPUnit for the reference implementations.
+- **Publish** triggers on `v*` tags: checks version parity across **all six** packages
+  (`scripts/check-versions.mjs`), builds, smoke-tests the packed TS tarballs, validates, then
+  publishes npm core **before** electron (electron's `workspace:*` dependency resolves to a
+  concrete version). Rust/Python/PHP publishing to crates.io/PyPI/Packagist is manual for now.
+- To release: `./scripts/release.sh X.Y.Z` bumps **all six** packages, runs the release gate,
+  commits, and tags. Then `git push origin main vX.Y.Z`.
 - Packages publish to the private Nocturna registry (`nocturna.dev`).
 - Document notable changes in [CHANGELOG.md](CHANGELOG.md).
 
