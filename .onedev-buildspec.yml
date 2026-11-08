@@ -22,6 +22,19 @@ jobs:
     condition: SUCCESSFUL
     optional: false
   - type: CommandStep
+    name: network-probe
+    runInContainer: true
+    image: node:20-alpine
+    interpreter:
+      type: PosixInterpreter
+      shell: sh
+      commands: |
+        node -e "const t=(u)=>Promise.race([fetch(u,{redirect:'manual'}).then(r=>'HTTP '+r.status),new Promise((_,re)=>setTimeout(()=>re(new Error('TIMEOUT-8s')),8000))]).catch(e=>e.message);Promise.all([t('https://registry.npmjs.org/pnpm'),t('https://nocturna.dev/coding-standards/~npm/pnpm'),t('https://nocturna.dev')]).then(r=>console.log('REACHABILITY '+r.join(' | '))).catch(e=>console.log('PROBE-FAIL',e.message))"
+    runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: install
     runInContainer: true
     image: node:20-alpine
