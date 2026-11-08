@@ -107,9 +107,9 @@ jobs:
       shell: sh
       commands: |
         cd node
-        node_modules/.bin/vitest run --coverage
+        node_modules/.bin/vitest run
         cd ../electron
-        node_modules/.bin/vitest run --coverage
+        node_modules/.bin/vitest run
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
