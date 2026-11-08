@@ -10,17 +10,6 @@ jobs:
     withSubmodules: false
     condition: SUCCESSFUL
     optional: false
-  - type: SetupCacheStep
-    name: set-up-pnpm-cache
-    key: pnpm-store
-    checksumFiles: pnpm-lock.yaml
-    entries:
-    - path: /root/.pnpm-store
-    - path: node_modules
-    - path: /root/.cache/node/corepack
-    uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
-    condition: SUCCESSFUL
-    optional: false
   - type: CommandStep
     name: network-probe
     runInContainer: true
@@ -222,17 +211,6 @@ jobs:
       type: DefaultCredential
     withLfs: false
     withSubmodules: false
-    condition: SUCCESSFUL
-    optional: false
-  - type: SetupCacheStep
-    name: set-up-pnpm-cache
-    key: pnpm-store
-    checksumFiles: pnpm-lock.yaml
-    entries:
-    - path: /root/.pnpm-store
-    - path: node_modules
-    - path: /root/.cache/node/corepack
-    uploadStrategy: UPLOAD_IF_NOT_EXACT_MATCH
     condition: SUCCESSFUL
     optional: false
   - type: CommandStep
