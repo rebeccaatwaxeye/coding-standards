@@ -345,7 +345,12 @@ jobs:
         git remote remove github >/dev/null 2>&1 || true
         git remote add github "https://x-access-token:${GITHUB_TOKEN}@@github.com/rebeccaatwaxeye/coding-standards.git"
         git push github --all --force
-        git push github --tags --force
+        # Tags go one by one: GitHub skips push events when a single push
+        # updates more than three tags, which would leave the mirrored
+        # Actions workflow untriggered on first-time mirrors.
+        git for-each-ref --format '%(refname)' refs/tags | while read tag; do
+          git push github "$tag" --force
+        done
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
