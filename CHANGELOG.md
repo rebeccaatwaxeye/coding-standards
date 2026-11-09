@@ -2,6 +2,14 @@
 
 Notable changes to the `@nocturna/logger` packages and their release pipeline.
 
+## 0.1.6
+
+### Release pipeline
+
+- The GitHub mirror step now pushes tags one at a time: GitHub skips push
+  events when a single push updates more than three tags, which silently
+  left the mirrored Actions workflow untriggered on first-time mirrors.
+
 ## 0.1.5
 
 ### Release pipeline
