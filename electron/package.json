@@ -1,6 +1,6 @@
 {
   "name": "@nocturna/logger-electron",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Electron-specific logger extensions — IPC bridge, file sink, and global error handlers",
   "type": "module",
   "exports": {

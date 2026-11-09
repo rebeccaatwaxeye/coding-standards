@@ -1,6 +1,6 @@
 [package]
 name = "nocturna-logger-tauri"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 description = "Tauri-specific logger extensions — app-data file sink, IPC bridge, and panic handlers for the Nocturna logging spec"
 license = "MIT"

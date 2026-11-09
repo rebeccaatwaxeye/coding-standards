@@ -1,6 +1,6 @@
 {
   "name": "nocturna/logger",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Zero-config structured logger for PHP — reference implementation of the Nocturna logging spec (§14)",
   "license": "MIT",
   "type": "library",
