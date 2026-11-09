@@ -2,6 +2,19 @@
 
 Notable changes to the `@nocturna/logger` packages and their release pipeline.
 
+## 0.1.5
+
+### Release pipeline
+
+- The Publish job now mirrors the whole repository (all branches and tags,
+  force-pushed) to the GitHub mirror `rebeccaatwaxeye/coding-standards` after
+  the npm publish step succeeds; the mirror token lives in a OneDev secret
+  (`github-mirror-token`).
+- A GitHub Actions workflow (`.github/workflows/publish.yml`) on the mirror
+  attaches the npm tarballs and the Python sdist/wheel to a GitHub Release
+  for each `v*` tag. npm is not published to GitHub Packages (its scope must
+  match the repo owner); Rust/PHP remain git-tag-only installs.
+
 ## 0.1.1
 
 First release the pipeline can fully prove. v0.1.0 was tagged before the

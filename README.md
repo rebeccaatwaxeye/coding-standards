@@ -96,6 +96,10 @@ Agents working in this repo should read [AGENTS.md](AGENTS.md).
 - To release: `./scripts/release.sh X.Y.Z` bumps **all six** packages, runs the release gate,
   commits, and tags. Then `git push origin main vX.Y.Z`.
 - Packages publish to the private Nocturna registry (`nocturna.dev`).
+- After a successful publish, the job mirrors all branches and tags to the GitHub mirror
+  (`github.com/rebeccaatwaxeye/coding-standards`). A GitHub Actions workflow there attaches
+  the npm tarballs and the Python sdist/wheel to a GitHub Release for the tag — npm cannot
+  go to GitHub Packages because its `@nocturna` scope must match the repo owner.
 - Document notable changes in [CHANGELOG.md](CHANGELOG.md).
 
 ## Installing the Loggers (Internal)

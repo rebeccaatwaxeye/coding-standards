@@ -1,0 +1,70 @@
+name: Publish (GitHub mirror)
+
+# OneDev's Publish job mirrors every branch and tag to this repository after a
+# successful publish. A pushed v* tag runs this workflow, which attaches the
+# built package artifacts to a GitHub Release for the tag:
+# - npm tarballs for @nocturna/logger and @nocturna/logger-electron
+#   (npm.pkg.github.com is not an option: the @nocturna scope must match the
+#   repo owner, so release assets are the npm distribution on GitHub)
+# - Python sdist + wheel for nocturna-logger
+# Rust/PHP stay git-tag-only (tag is mirrored here, so git installs work).
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Attach package assets to release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check version parity
+        run: node scripts/check-versions.mjs
+
+      - name: Build npm packages (core first, then electron)
+        run: |
+          pnpm --filter "@nocturna/logger" run build
+          pnpm --filter "@nocturna/logger-electron" run build
+
+      - name: Pack npm tarballs
+        run: |
+          mkdir -p release-assets
+          pnpm --filter "@nocturna/logger" pack --pack-destination release-assets
+          pnpm --filter "@nocturna/logger-electron" pack --pack-destination release-assets
+
+      - name: Build Python sdist and wheel
+        run: |
+          python -m pip install --quiet build
+          python -m build --outdir release-assets python
+
+      - name: Create release with assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            release-assets/* \
+          || {
+            echo "Release already exists, replacing assets"
+            gh release upload "${GITHUB_REF_NAME}" release-assets/* --clobber
+          }

@@ -329,6 +329,27 @@ jobs:
     useTTY: true
     condition: SUCCESSFUL
     optional: false
+  - type: CommandStep
+    name: mirror-to-github
+    runInContainer: true
+    image: node:20-alpine
+    interpreter:
+      type: PosixInterpreter
+      shell: sh
+      commands: |
+        set -e
+        apk add --no-cache git ca-certificates
+        git config --global --add safe.directory "$PWD"
+        GITHUB_TOKEN='@secret:github-mirror-token@'
+        # Double at-signs below are OneDev escaping of the literal at-sign in the URL.
+        git remote remove github >/dev/null 2>&1 || true
+        git remote add github "https://x-access-token:${GITHUB_TOKEN}@@github.com/rebeccaatwaxeye/coding-standards.git"
+        git push github --all --force
+        git push github --tags --force
+    runAs: 0:0
+    useTTY: true
+    condition: SUCCESSFUL
+    optional: false
   triggers:
   - type: TagCreateTrigger
     tags: v*
