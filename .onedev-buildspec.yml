@@ -340,6 +340,11 @@ jobs:
         set -e
         apk add --no-cache git ca-certificates
         git config --global --add safe.directory "$PWD"
+        # The tag checkout is partial (detached, no local branches/tags), so
+        # materialize every branch and tag from the OneDev origin first or the
+        # pushes below become silent no-ops.
+        git fetch origin --unshallow >/dev/null 2>&1 || true
+        git fetch origin --force '+refs/heads/*:refs/heads/*' '+refs/tags/*:refs/tags/*'
         GITHUB_TOKEN='@secret:github-mirror-token@'
         # Double at-signs below are OneDev escaping of the literal at-sign in the URL.
         git remote remove github >/dev/null 2>&1 || true
@@ -351,6 +356,12 @@ jobs:
         git for-each-ref --format '%(refname)' refs/tags | while read tag; do
           git push github "$tag" --force
         done
+        # Fail loudly if the pushes were no-ops (partial clone etc.).
+        [ "$(git ls-remote github refs/heads/main | cut -f1)" = "$(git rev-parse refs/heads/main)" ] || { echo "mirror verification failed: main not updated on GitHub"; exit 1; }
+        TAG_NAME=$(git describe --tags --exact-match HEAD 2>/dev/null || true)
+        if [ -n "$TAG_NAME" ]; then
+          git ls-remote github "refs/tags/$TAG_NAME" | grep -q "$(git rev-parse "refs/tags/$TAG_NAME")" || { echo "mirror verification failed: $TAG_NAME missing on GitHub"; exit 1; }
+        fi
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL

@@ -2,6 +2,15 @@
 
 Notable changes to the `@nocturna/logger` packages and their release pipeline.
 
+## 0.1.7
+
+### Release pipeline
+
+- The GitHub mirror step now fetches all branches and tags from the OneDev
+  origin before pushing (the tag checkout is partial, so pushes were silent
+  no-ops) and verifies main and the built tag actually landed on GitHub,
+  failing the step loudly if they did not.
+
 ## 0.1.6
 
 ### Release pipeline
