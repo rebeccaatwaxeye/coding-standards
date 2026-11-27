@@ -24,7 +24,7 @@ strict = true
 
 ## Structure
 
-- One class per file where possible. Max 400 lines per file (stricter than core §2).
+- One class per file where possible. File length per core §2 — 400-line comfort ceiling; split on a second concept, not to hit the number.
 - Group related modules in packages with explicit `__init__.py` exports.
 
 ## Types

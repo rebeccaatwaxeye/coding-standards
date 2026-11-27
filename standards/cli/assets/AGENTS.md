@@ -23,7 +23,7 @@
 |---|---|
 | Function length | ≤ 30 lines ideal; 50 hard ceiling |
 | Function purpose | Name must not contain "and" or "or" |
-| File length | 200–400 lines comfort; 500+ requires justification |
+| File length | 200–400 comfort; beyond ~500 look for a natural split — never split just to hit the number |
 | Nesting depth | ≤ 3 levels — flatten via early return or extraction |
 | Parameters | ≤ 4 positional; use object/struct beyond that |
 | Cyclomatic complexity | ≤ 10 per function |
@@ -154,6 +154,12 @@ This is enforced by the logger, not by caller discipline. Do not disable it.
 
 - File sinks rotate daily and prune by age and total size.
 - Install top-level `unhandledRejection` / `uncaughtException` handlers: log `CRITICAL`, flush, exit non-zero.
+
+### 9.7 Coverage & Verbosity
+
+- Log through the project logger in every module — not just at boundaries and error paths. A component that can fail silently, make a decision, or change state logs it.
+- Pick levels by §9.1's deciding questions; they are binding, not advisory. A failed operation at `WARN` or routine flow at `INFO` is a defect.
+- DEBUG must be verbose enough to trace execution end-to-end without a debugger: entry/exit, branch decisions and why, variable values, timings, retries. Sparse DEBUG instrumentation is a defect — the production floor (§9.2) keeps logs clean, so instrument liberally.
 
 ---
 

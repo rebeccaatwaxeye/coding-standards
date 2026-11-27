@@ -1,6 +1,6 @@
 # Coding Standards
 
-> **Version:** 1.10.0
+> **Version:** 1.11.0
 > **Last reviewed:** 2026-11-27
 > **Applies to:** All repositories (Laravel, Astro/Svelte, Rust, Python, Infrastructure)
 > **Enforced by:** CI lint gates and pre-commit hooks. Do not rely on manual review for formatting or style.
@@ -29,7 +29,7 @@
 |---------|------|-----------|
 | **Function length** | ≤ 30 lines ideal; 50 lines hard ceiling | Cognitive load and testability |
 | **Function purpose** | Name must not contain "and" or "or" | Single responsibility |
-| **File length** | 200–400 lines comfort zone; 500+ requires justification | Navigation and review speed |
+| **File length** | 200–400 lines comfort zone. Beyond ~500, look for a natural split — but never split a file just to satisfy the number | Navigation and review speed |
 | **Nesting depth** | ≤ 3 levels (if/for/match) | Flatten via early returns or extraction |
 | **Parameters** | ≤ 4 positional args; use structs/objects beyond that | Self-documenting signatures |
 | **Cyclomatic complexity** | ≤ 10 per function | Branch coverage feasibility |
@@ -155,7 +155,7 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
 - **Dependencies:** Lock with `uv.lock` (uv) or `poetry.lock` (Poetry). Never pin loosely in production.
 - **Docstrings:** Google style. Every public module, class, and method.
 - **Testing:** `pytest`. Test files as `test_*.py`; fixtures over setup/teardown methods.
-- **Structure:** One class per file where possible. File length is stricter than §2: 400 lines hard max. Group related modules in packages with explicit `__init__.py` exports.
+- **Structure:** One class per file where possible. File length follows §2 with a 400-line comfort ceiling — split when a module grows a second concept, not to hit the number. Group related modules in packages with explicit `__init__.py` exports.
 - **Lint enforcement:** select ruff groups `E, F, I, UP, B, SIM, TRY, T20, PTH` — `T20` bans `print`, `PTH` enforces `pathlib`, `B904` enforces `raise ... from`. Run `mypy` in strict mode in CI.
 - **Coverage:** gate CI on `pytest --cov --cov-branch --cov-fail-under=90`.
 
@@ -456,12 +456,28 @@ the same `ERROR` production floor, and the same no-swallowed-errors rules:
 All must honour the same level set, the same `ERROR` production floor, and the same
 no-swallowed-errors rules.
 
+### 14.11 Log Coverage & Verbosity
+
+- **Log everywhere.** Every module logs through the shared logger — not just boundaries and
+  error paths. A component that can fail silently, make a decision, or change state logs it.
+- **Levels are binding, not advisory.** Choose per §14.1's deciding questions; mislevelled
+  events (a failed operation at `WARN`, routine flow at `INFO`) are defects.
+- **DEBUG must be genuinely verbose.** Enabling debug logging (§14.2) should let you trace
+  execution end-to-end without a debugger: module/function entry and exit, branch decisions
+  and why, relevant variable values, timings, retry attempts. If turning on `DEBUG` doesn't
+  materially help you diagnose a misbehaving service, the instrumentation is insufficient —
+  add it before you need it, not during the incident.
+- **Verbosity is free at rest.** `DEBUG` entries are filtered out above the threshold, so
+  they cost nothing in production. Clean production logs come from the level floor, not from
+  sparse instrumentation — never self-censor `DEBUG` calls "to keep the logs clean".
+
 ---
 
 ## Changelog
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.11.0 | 2026-11-28 | §2 file length is explicitly not a hard limit — split only when a natural conceptual split exists (§8.4 Python ceiling softened to match). New §14.11 log coverage & verbosity: every module logs, level choices per §14.1 are binding, and DEBUG must be verbose enough to trace execution end-to-end. |
 | 1.10.0 | 2026-11-28 | §8.1 style rule changed: no semicolons (`semi: false`) and no trailing commas (`trailingComma: "none"`) replace the es5 comma rule; the shipped Biome fragment now carries matching formatter settings. |
 | 1.9.1 | 2026-11-28 | §14.9 distribution note corrected: the OneDev host does run PyPI and Cargo registries — Python and Rust packages publish there (git tags remain the distribution for PHP and a fallback for the rest). No rule changes. |
 | 1.9.0 | 2026-11-27 | Distribution: symlink model replaced — the doc is now installed as a stamped, read-only snapshot via the `@nocturna/standards` npm package, the `nocturna-standards` cargo CLI, or `standards/agents/install.sh`; header rewritten accordingly. Versioning: switched to semver (X.Y.Z) and this header is now the single source of truth for the standards version — `agents/VERSION` retired; the installer stamp and both installer packages derive from it. |
