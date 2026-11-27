@@ -161,32 +161,49 @@ Agents working in this repo should read [AGENTS.md](AGENTS.md).
 
 ## Installing the Loggers (Internal)
 
-The npm packages come from the OneDev registry — configure the scope once in
-`~/.npmrc`:
+All packages publish to private registries on the OneDev host; git tags remain as a
+fallback (and as the only route for PHP). Version parity guarantees every release
+carries all six packages at the same version.
+
+**npm (TypeScript)** — configure the scope once in `~/.npmrc`:
 
 ```
 @nocturna:registry=https://nocturna.dev/coding-standards/~npm/
 ```
 
-The Rust, Python, and PHP packages have no external registry — **git tags are the
-distribution mechanism**. Pin the tag that matches the release you want (`vX.Y.Z`);
-version parity guarantees every tag carries all six packages.
+```bash
+pnpm add @nocturna/logger @nocturna/logger-electron
+```
 
-**Rust** — the repo root is a Cargo workspace, so git dependencies can select the crate:
+**PyPI (Python)** — the registry requires auth; use `__token__` with your OneDev
+token (in the URL, `.netrc`, or keyring):
+
+```bash
+pip install nocturna-logger \
+  --index-url https://__token__:<ONEDEV_TOKEN>@nocturna.dev/coding-standards/~pypi/simple/
+```
+
+**Cargo (Rust)** — define the registry and provide a token (the registry requires
+auth for reads too):
+
+```toml
+# .cargo/config.toml (project or ~/.cargo)
+[registries.nocturna]
+index = "sparse+https://nocturna.dev/coding-standards/~cargo/"
+```
+
+```bash
+export CARGO_REGISTRIES_NOCTURNA_TOKEN=<ONEDEV_TOKEN>
+```
 
 ```toml
 [dependencies]
-nocturna-logger = { git = "https://nocturna.dev/coding-standards.git", tag = "vX.Y.Z", package = "nocturna-logger" }
-nocturna-logger-tauri = { git = "https://nocturna.dev/coding-standards.git", tag = "vX.Y.Z", package = "nocturna-logger-tauri" }
+nocturna-logger = { version = "0.1", registry = "nocturna" }
+nocturna-logger-tauri = { version = "0.1", registry = "nocturna" }
 ```
 
-**Python** — pip's subdirectory syntax points at `logger/python/`:
-
-```bash
-pip install "nocturna-logger @ git+https://nocturna.dev/coding-standards.git@vX.Y.Z#subdirectory=logger/python"
-```
-
-**PHP** — a root-level `composer.json` makes the repo resolvable as a Composer VCS package:
+**Composer (PHP)** — no Composer registry exists, so PHP installs from the git repo
+as a VCS package:
 
 ```json
 {
@@ -199,8 +216,28 @@ pip install "nocturna-logger @ git+https://nocturna.dev/coding-standards.git@vX.
 }
 ```
 
-Auth: use the same OneDev credentials you use for git (composer/cargo/pip will
-prompt or read them from your git credential helper).
+### Fallback: git tags
+
+Every release is also a `vX.Y.Z` tag on this repository, which carries all six
+packages. Pin the tag matching the release you want:
+
+**Rust** — the repo root is a Cargo workspace, so git dependencies can select the crate:
+
+```toml
+[dependencies]
+nocturna-logger = { git = "https://nocturna.dev/coding-standards.git", tag = "vX.Y.Z", package = "nocturna-logger" }
+nocturna-logger-tauri = { git = "https://nocturna.dev/coding-standards.git", tag = "vX.Y.Z", package = "nocturna-logger-tauri" }
+```
+
+**Python** — pip's subdirectory syntax points at `logger/python/` (tags up to
+v0.1.7 use the old layout: `#subdirectory=python`):
+
+```bash
+pip install "nocturna-logger @ git+https://nocturna.dev/coding-standards.git@vX.Y.Z#subdirectory=logger/python"
+```
+
+Auth for git-based installs: use the same OneDev credentials you use for git
+(composer/cargo/pip will prompt or read them from your git credential helper).
 
 ## License
 

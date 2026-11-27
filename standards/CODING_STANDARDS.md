@@ -1,6 +1,6 @@
 # Coding Standards
 
-> **Version:** 1.9.0
+> **Version:** 1.9.1
 > **Last reviewed:** 2026-11-27
 > **Applies to:** All repositories (Laravel, Astro/Svelte, Rust, Python, Infrastructure)
 > **Enforced by:** CI lint gates and pre-commit hooks. Do not rely on manual review for formatting or style.
@@ -427,9 +427,10 @@ byte-for-byte; parity fixtures are asserted in every language's test suite:
 | `nocturna/logger` (`logger/php/`) | PHP 8.1+ | `LoggerFactory::create(LoggerOptions)`, `$log(...)` invoke shorthand, exception/error/shutdown handlers per §14.8; ext-json only |
 
 All six packages share one version across releases (enforced by the version-parity check in CI
-and `scripts/check-versions.mjs`). Distribution: the npm packages publish to a private registry;
-the Rust, Python, and PHP packages have no registry — **git tags are their distribution** (see
-README, "Installing the Loggers").
+and `scripts/check-versions.mjs`). Distribution: the TypeScript, Python, and Rust packages
+publish to private npm, PyPI, and Cargo registries on the OneDev host; the PHP package has no
+Composer registry — **git tags are its distribution**, and remain a fallback for the others
+(see README, "Installing the Loggers").
 
 > **Dependency direction is one-way:** the core package must never import Electron. Host-specific
 > packages (`logger/electron/`, `logger/rust-tauri/`) depend on the core — never the reverse.
@@ -461,6 +462,7 @@ no-swallowed-errors rules.
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.9.1 | 2026-11-28 | §14.9 distribution note corrected: the OneDev host does run PyPI and Cargo registries — Python and Rust packages publish there (git tags remain the distribution for PHP and a fallback for the rest). No rule changes. |
 | 1.9.0 | 2026-11-27 | Distribution: symlink model replaced — the doc is now installed as a stamped, read-only snapshot via the `@nocturna/standards` npm package, the `nocturna-standards` cargo CLI, or `standards/agents/install.sh`; header rewritten accordingly. Versioning: switched to semver (X.Y.Z) and this header is now the single source of truth for the standards version — `agents/VERSION` retired; the installer stamp and both installer packages derive from it. |
 | 1.8 | 2026-11-27 | §14.2: `SILENT` documented as a disable switch, not a numeric comparison; dev-detection signals corrected (`VITE_DEV_SERVER_URL`, not `process.dev`). §14.4: Biome config mirrors the shipped fragment (`noConsole` with `allow: []`, 2.5 schema). §14.6: substring key-match semantics specified (over-redaction by design); redaction covers `meta.error`. §14.9: registry labels corrected — Rust/Python/PHP distribute via git tags. §7: coverage floor raised to 90/80. §10: de-platformed (Bugsink/Uptrace narrative removed) and now points to §14. §13 removed (platform-specific; number reserved). §8.4: misplaced TypeScript bullet removed; Python file ceiling reconciled with §2. §3, §8.1, §11, §12 aligned with practice. |
 | 1.7 | 2026-08-29 | §14 Structured Logging: canonical level set, prod=ERROR floor, no-swallowed-errors rule + lint configs, redaction, file sink retention, global handlers. Canonical location directive (symlink, not copy). Reference `@nocturna/logger` + `@nocturna/logger-electron` packages. |
