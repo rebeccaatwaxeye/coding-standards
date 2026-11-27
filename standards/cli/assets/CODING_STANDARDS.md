@@ -1,6 +1,6 @@
 # Coding Standards
 
-> **Version:** 1.9.1
+> **Version:** 1.10.0
 > **Last reviewed:** 2026-11-27
 > **Applies to:** All repositories (Laravel, Astro/Svelte, Rust, Python, Infrastructure)
 > **Enforced by:** CI lint gates and pre-commit hooks. Do not rely on manual review for formatting or style.
@@ -116,7 +116,7 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
 ### 8.1 JavaScript / TypeScript (Astro, Svelte, React)
 
 - **Formatter:** Prettier 3. **Linter:** ESLint (flat config). Biome 2.5 is an accepted alternative for both — the logger packages ship config sets for each (§14.4).
-- **Config:** `printWidth: 100`, `singleQuote: true`, `trailingComma: "es5"`. Svelte/SvelteKit projects must include `prettier-plugin-svelte` so `.svelte` files are formatted too.
+- **Config:** `printWidth: 100`, `singleQuote: true`, `semi: false`, `trailingComma: "none"` — no semicolons, no trailing commas. Svelte/SvelteKit projects must include `prettier-plugin-svelte` so `.svelte` files are formatted too. The shipped Biome fragment (`@nocturna/logger/configs`) carries the same style (`semicolons: "asNeeded"`, `trailingCommas: "none"`).
 - **TypeScript:** Enable `strict`, `strictNullChecks`, `noImplicitAny`, `noUncheckedIndexedAccess`.
 - **Imports:** Absolute aliases for cross-module (`$lib/`, `@/`), relative for siblings (`./`).
 - **Svelte:** One component per file. Co-locate styles unless using a shared design system. Prefer Svelte 5 runes (`$state`, `$derived`); extract shared state and logic to `.svelte.ts` modules. Legacy stores are acceptable only for interop.
@@ -462,6 +462,7 @@ no-swallowed-errors rules.
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.10.0 | 2026-11-28 | §8.1 style rule changed: no semicolons (`semi: false`) and no trailing commas (`trailingComma: "none"`) replace the es5 comma rule; the shipped Biome fragment now carries matching formatter settings. |
 | 1.9.1 | 2026-11-28 | §14.9 distribution note corrected: the OneDev host does run PyPI and Cargo registries — Python and Rust packages publish there (git tags remain the distribution for PHP and a fallback for the rest). No rule changes. |
 | 1.9.0 | 2026-11-27 | Distribution: symlink model replaced — the doc is now installed as a stamped, read-only snapshot via the `@nocturna/standards` npm package, the `nocturna-standards` cargo CLI, or `standards/agents/install.sh`; header rewritten accordingly. Versioning: switched to semver (X.Y.Z) and this header is now the single source of truth for the standards version — `agents/VERSION` retired; the installer stamp and both installer packages derive from it. |
 | 1.8 | 2026-11-27 | §14.2: `SILENT` documented as a disable switch, not a numeric comparison; dev-detection signals corrected (`VITE_DEV_SERVER_URL`, not `process.dev`). §14.4: Biome config mirrors the shipped fragment (`noConsole` with `allow: []`, 2.5 schema). §14.6: substring key-match semantics specified (over-redaction by design); redaction covers `meta.error`. §14.9: registry labels corrected — Rust/Python/PHP distribute via git tags. §7: coverage floor raised to 90/80. §10: de-platformed (Bugsink/Uptrace narrative removed) and now points to §14. §13 removed (platform-specific; number reserved). §8.4: misplaced TypeScript bullet removed; Python file ceiling reconciled with §2. §3, §8.1, §11, §12 aligned with practice. |

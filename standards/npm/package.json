@@ -1,6 +1,6 @@
 {
   "name": "@nocturna/standards",
-  "version": "1.9.1",
+  "version": "1.10.0",
   "description": "Installs the Nocturna coding standards (AGENTS.md, language slices, CODING_STANDARDS.md) into a repository",
   "type": "module",
   "bin": {
