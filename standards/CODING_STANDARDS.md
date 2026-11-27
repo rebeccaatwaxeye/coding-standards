@@ -1,11 +1,16 @@
 # Coding Standards
 
-> **Version:** 1.7
-> **Last reviewed:** 2026-08-29
+> **Version:** 1.9.0
+> **Last reviewed:** 2026-11-27
 > **Applies to:** All repositories (Laravel, Astro/Svelte, Rust, Python, Infrastructure)
 > **Enforced by:** CI lint gates and pre-commit hooks. Do not rely on manual review for formatting or style.
-> **Canonical location:** This document lives at `~/Code/coding-standards/CODING_STANDARDS.md`.
-> Other repositories **symlink** to it (`ln -s`) rather than copying — copies drift, symlinks cannot.
+> **Distribution:** Installed into repositories as a stamped, read-only snapshot — via the
+> `@nocturna/standards` npm package, the `nocturna-standards` cargo CLI, or
+> `standards/agents/install.sh`
+> (see README, "Installing the Standards"). The source of truth is the `coding-standards`
+> repository — never edit installed copies; change the source and re-install.
+> **Versioning:** This header is the single source of truth for the standards version. The
+> installer stamp, `@nocturna/standards`, and `nocturna-standards` all derive their version from it.
 
 ---
 
@@ -45,7 +50,7 @@ Use the scheme native to each language, but be consistent within a repo.
 | Variables, functions | `camelCase` / `snake_case` (lang-specific) | `fetchUserData`, `calculate_proration` |
 | Classes, structs, enums | `PascalCase` | `UserProfile`, `BillingError` |
 | Constants, env vars | `SCREAMING_SNAKE_CASE` | `API_TIMEOUT_MS` |
-| Files | `kebab-case` | `user-profile.svelte`, `billing_service.py` |
+| Files | `kebab-case`; `snake_case` where the language requires it (Python modules) | `user-profile.svelte`, `billing_service.py` |
 | Boolean flags | Prefix with `is`, `has`, `should` | `isActive`, `hasPermission` |
 
 ---
@@ -96,7 +101,7 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
 
 | Scope | Target | Notes |
 |-------|--------|-------|
-| **Unit** | Pure functions, no I/O | 80%+ coverage on business logic. Fast (< 100ms per suite). |
+| **Unit** | Pure functions, no I/O | Coverage gate: 90% statements/functions/lines, 80% branches, enforced in CI. Fast (< 100ms per suite). |
 | **Integration** | DB round-trips, API contracts | Test Laravel Form Requests, SvelteKit load functions, Rust handler layers, Python service layers. |
 | **E2E** | Critical user paths only | Booking, payment, auth flows. Do not E2E-test every edge case. |
 
@@ -110,13 +115,13 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
 
 ### 8.1 JavaScript / TypeScript (Astro, Svelte, React)
 
-- **Formatter:** Prettier 3. **Linter:** ESLint (flat config).
+- **Formatter:** Prettier 3. **Linter:** ESLint (flat config). Biome 2.5 is an accepted alternative for both — the logger packages ship config sets for each (§14.4).
 - **Config:** `printWidth: 100`, `singleQuote: true`, `trailingComma: "es5"`. Svelte/SvelteKit projects must include `prettier-plugin-svelte` so `.svelte` files are formatted too.
 - **TypeScript:** Enable `strict`, `strictNullChecks`, `noImplicitAny`, `noUncheckedIndexedAccess`.
 - **Imports:** Absolute aliases for cross-module (`$lib/`, `@/`), relative for siblings (`./`).
 - **Svelte:** One component per file. Co-locate styles unless using a shared design system. Prefer Svelte 5 runes (`$state`, `$derived`); extract shared state and logic to `.svelte.ts` modules. Legacy stores are acceptable only for interop.
 - **Astro:** Islands for interactivity only. Keep content pages static where possible.
-- **Project config:** Use `eslint.config.js` (flat config) and `prettier.config.js` at repo root. See project templates for working examples.
+- **Project config:** Use `eslint.config.js` (flat config) and `prettier.config.js` — or `biome.json` — at repo root. See project templates for working examples.
 
 ### 8.2 PHP (Laravel)
 
@@ -149,10 +154,8 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
 - **Path handling:** Use `pathlib.Path` over `os.path`.
 - **Dependencies:** Lock with `uv.lock` (uv) or `poetry.lock` (Poetry). Never pin loosely in production.
 - **Docstrings:** Google style. Every public module, class, and method.
-- **Testing:** TypeScript projects use `pnpm test` (Vitest) in `api-ts/` and `scraper-ts/`.
-  Python projects in general use `pytest`, but the legacy Python pytest suite in this
-  repository was removed along with the fetch/compile pipeline (ADR-0010 / ADR-0011 Phase 9).
-- **Structure:** One class per file where possible. Max 400 lines. Group related modules in packages with explicit `__init__.py` exports.
+- **Testing:** `pytest`. Test files as `test_*.py`; fixtures over setup/teardown methods.
+- **Structure:** One class per file where possible. File length is stricter than §2: 400 lines hard max. Group related modules in packages with explicit `__init__.py` exports.
 - **Lint enforcement:** select ruff groups `E, F, I, UP, B, SIM, TRY, T20, PTH` — `T20` bans `print`, `PTH` enforces `pathlib`, `B904` enforces `raise ... from`. Run `mypy` in strict mode in CI.
 - **Coverage:** gate CI on `pytest --cov --cov-branch --cov-fail-under=90`.
 
@@ -170,33 +173,18 @@ Document **intent**, not mechanics. Mechanics are visible in the code; intent is
 
 ## 10. Observability & Logging
 
-- **Error reporting: Sentry/Bugsink.** The platform uses a minimal Sentry-compatible client (`@sentry/node`) pointed at a self-hosted Bugsink backend. This keeps runtime memory low and operational complexity small compared to a full OpenTelemetry/SigNoz stack. When `BUGSINK_DSN` is absent the service disables error reporting and starts normally.
-- **No `console.log` / `print()` / `dbg!()` in production.** Use structured logging:
-  - JS: `pino`
-  - PHP: `monolog` with JSON formatter
-  - Rust: `tracing` with `tracing-subscriber`
-  - Python: `structlog`
-- **Configuration via code:** Logging level and error-reporting DSN are resolved through the language-appropriate configuration layer (e.g., `AppConfig` in api-ts) so tests can override them without mutating `process.env`.
-- **Fail loudly on misconfiguration:** If error reporting is requested (DSN set) but initialization fails, the failure must be observable (logged to stderr, exposed on the handle, or cause boot to abort) rather than swallowed.
-- **Log levels:**
-  - `DEBUG`: Detailed flow (development only)
-  - `INFO`: Business events ("user subscribed", "payment received")
-  - `WARN`: Recoverable anomalies ("retrying failed request")
-  - `ERROR`: Failures requiring human attention ("DB connection lost")
-
-### Upgrade Path: Uptrace (Full Observability)
-
-When the platform outgrows Bugsink (e.g., need for metrics, distributed tracing, or performance monitoring), migrate to **Uptrace**:
-
-- **Why Uptrace:** Single Go binary (~50MB), self-hosted free (no feature limits), OpenTelemetry-native, handles traces + metrics + logs in one platform. ClickHouse backend scales to billions of spans.
-- **Migration:** Both Bugsink and Uptrace use OpenTelemetry SDKs — instrumentation code stays the same; just swap the exporter endpoint.
-- **Capabilities over Bugsink:**
-  - Distributed tracing with service graphs and latency percentiles (p50/p90/p99)
-  - Custom metrics and infrastructure monitoring
-  - Alerting and dashboards
-  - Structured log aggregation
-- **Configuration:** Set `UPTRACE_DSN` (replaces `BUGSINK_DSN`); disable gracefully when absent (same pattern as Bugsink).
-- **Reference:** [uptrace.dev](https://uptrace.dev/)
+- **Structured logging is mandatory** — no `console.log` / `print()` / `dbg!()` in production
+  application code. The canonical level set, logger contract, and reference packages are defined
+  in §14; §14.10 lists the idiomatic library for non-TypeScript stacks.
+- **Error reporting** uses a Sentry-compatible backend. When the DSN env var is absent, the
+  service disables error reporting and starts normally. If error reporting is requested (DSN set)
+  but initialization fails, the failure must be observable — logged to stderr, exposed on the
+  handle, or cause boot to abort — never swallowed.
+- **Configuration via code:** the logging level and error-reporting DSN resolve through the
+  language-appropriate configuration layer, so tests can override them without mutating process
+  env. (In the logger contract, an explicit `level` option wins over env detection — §14.2.)
+- **Log levels:** use the six-level set in §14.1. `ERROR` and above forward to the
+  error-reporting backend (§14.5).
 
 ---
 
@@ -209,6 +197,11 @@ All projects must include these files at repository root:
 | `.editorconfig` | Cross-editor consistency (indent, newline, charset) |
 | `Makefile` / `justfile` / `package.json` scripts | Standard commands: `lint`, `test`, `format`, `typecheck` |
 | `.pre-commit-config.yaml` or Husky | Run linters/formatters on staged files only |
+
+Deployable application repos (services, not libraries) must also include:
+
+| File | Purpose |
+|------|---------|
 | `docker-compose.yml` or `compose.yml` | One-command local environment |
 
 ---
@@ -216,29 +209,18 @@ All projects must include these files at repository root:
 ## 12. Commit & PR Hygiene
 
 - **Conventional Commits:** `type(scope): description`
-  - Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`
+  - Types: `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
   - Example: `feat(billing): add prorated refund calculation`
 - **PR size:** < 400 lines changed ideal. > 800 requires justification.
 - **Self-review checklist:** Before requesting review, confirm lint, typecheck, and tests pass locally.
 
 ---
 
-## 13. Worker Job Progress Reporting
+## 13. (Reserved)
 
-Every background job processed by the queue workers MUST report standardized, machine-readable
-progress so operational dashboards and the first-run wizard can render status without scraping logs.
-
-- **Contract:** `design/infrastructure/job-progress-reporting.md` defines the `JobProgress` envelope
-  (base fields + discriminated `detail` union) and the `JobProgressReporter` Effect service.
-- **Requirement:** Every `JobDefinition` handler emits progress at phase/step boundaries and at
-  meaningful item checkpoints (e.g. per 500-record batch). Terminal states (`succeeded` / `failed`)
-  MUST be emitted.
-- **Sink:** Handlers report via the `JobProgressReporter` service (provided by the worker layer), not
-  by writing to the table directly.
-- **`fraction` is required-but-approximate:** emit best-effort 0–1; only `null` when no countable
-  unit exists (dashboard shows indeterminate).
-- **Storage:** progress persists to the `job_progress` table (api-ts-owned schema, ADR-0005); it is
-  queryable and restart-safe.
+Removed in v1.8. Worker job progress reporting is platform-specific, not a universal coding
+standard — it now lives in the platform repository's own documentation. The section number is
+retained so that §14 references in code comments across all implementations remain stable.
 
 ---
 
@@ -249,7 +231,7 @@ emits structured logs through a shared logger contract so behaviour is identical
 
 > **Canonical packages:** `@nocturna/logger` (core, zero runtime dependencies) and
 > `@nocturna/logger-electron` (Electron-specific sinks and IPC bridge). Non-TypeScript stacks
-> implement the same contract with the language-idiomatic library listed in §10.
+> implement the same contract with the language-idiomatic library listed in §14.10.
 
 ### 14.1 Levels
 
@@ -270,11 +252,14 @@ Six levels, numerically spaced so new levels can be inserted without renumbering
 
 ### 14.2 Environment Thresholds
 
-A level is emitted when `entry.value >= configured.value`.
+A level is emitted when `entry.value >= configured.value` — with one exception: **`SILENT` is a
+disable switch, not a point on the severity scale.** When the configured level is `SILENT`, nothing
+is emitted regardless of the numeric comparison. Implementations must special-case it; do not rely
+on its numeric value of 0.
 
 | Environment | Default | Emits | Detected by |
 |---|---|---|---|
-| Development | `DEBUG` | everything | `NODE_ENV=development`, `process.dev`, `DEV=true` |
+| Development | `DEBUG` | everything | `NODE_ENV=development`, `DEV=true`, `VITE_DEV_SERVER_URL` set |
 | Test | `SILENT` | nothing | `NODE_ENV=test` — assert on logs, don't print them |
 | **Production** | **`ERROR`** | **`ERROR` + `CRITICAL`** | everything else |
 | Override | `LOG_LEVEL` | any level above | case-insensitive env var, wins over all defaults |
@@ -328,23 +313,23 @@ export default [
     rules: {
       'no-empty': ['error', { allowEmptyCatch: false }],
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'all' }],
-      'no-console': 'error' // app code must use the logger; disable inside the logger itself
+      'no-console': ['error', { allow: [] }] // app code must use the logger; disable inside the logger itself
     }
   }
 ]
 ```
 
-**Lint enforcement — Biome (2.x):**
+**Lint enforcement — Biome (2.5):**
 
 ```jsonc
 {
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noEmptyBlockStatements": "error",
-        "noConsoleLog": "error"
+        "noConsole": { "level": "error", "options": { "allow": [] } }
       },
       "correctness": {
         "noUnusedVariables": "error"
@@ -366,7 +351,7 @@ export default [
 | **Console** | All | Browser: coloured module badge + level icon. Node: ANSI colour + timestamp. Human-readable by default. |
 | **File** | **Server-side / Node apps, and desktop (Electron)** | Required wherever no log aggregator is present. See §14.7. |
 | **Structured stdout** | Servers, containers | When `LOG_FORMAT=json`, emit one JSON object per line. This is the production default for containerised services — let the platform collect it. |
-| **Error reporting** | All | Forwards `ERROR`+ to the §10 backend (Bugsink → Uptrace). |
+| **Error reporting** | All | Forwards `ERROR`+ to the §10 error-reporting backend. |
 
 > **Do not build a file sink into browser or renderer code.** There is no filesystem. Renderer logs
 > forward to the main process over IPC (§14.9) or go straight to the console sink.
@@ -375,9 +360,13 @@ export default [
 
 Redaction runs **before every sink, always on** — it is not opt-in.
 
-- **Default redacted keys** (case-insensitive, applied recursively to `meta.data`):
+- **Default redacted keys** (case-insensitive, applied recursively to `meta.data` and `meta.error`):
   `token`, `password`, `passwd`, `pwd`, `secret`, `credential`, `authorization`, `bearer`,
   `api[-_]?key`, `apikey`, `access[-_]?key`, `private[-_]?key`, `cookie`, `session`, `jwt`, `otp`.
+- **Match semantics:** patterns match as case-insensitive *substrings* of the key, not exact keys —
+  `sessionId` and `sessionCount` both match `session`. Over-redaction is accepted by design;
+  under-redaction is not.
+- Values are redacted by key only — never by matching string content.
 - Redacted values are replaced with `[REDACTED]` — never truncated-but-partial.
 - **Never log** full request/response bodies at `INFO` or above, credentials, or PII (emails, phone
   numbers, addresses) unless a documented requirement forces it.
@@ -432,17 +421,18 @@ byte-for-byte; parity fixtures are asserted in every language's test suite:
 
 | Package | Stack | Notes |
 |---|---|---|
-| `nocturna-logger` (crates.io, `rust-cli/`) | Rust CLI / server | `create_logger(LoggerOptions)`, `#[track_caller]` locations, panic hook per §14.8; deps: chrono, regex, serde_json |
-| `nocturna-logger-tauri` (crates.io, `rust-tauri/`) | Rust + Tauri desktop | file sink defaults to `app_data_dir()/logs` (7-day retention), webview→main IPC command `nocturna_log` with per-module logger cache |
-| `nocturna-logger` (PyPI, `python/`) | Python | `create_logger(module, ...)`, `sys.excepthook` + `threading.excepthook` handlers per §14.8; stdlib only |
-| `nocturna/logger` (Packagist, `php/`) | PHP 8.1+ | `LoggerFactory::create(LoggerOptions)`, `$log(...)` invoke shorthand, exception/error/shutdown handlers per §14.8; ext-json only |
+| `nocturna-logger` (`logger/rust-cli/`) | Rust CLI / server | `create_logger(LoggerOptions)`, `#[track_caller]` locations, panic hook per §14.8; deps: chrono, regex, serde_json |
+| `nocturna-logger-tauri` (`logger/rust-tauri/`) | Rust + Tauri desktop | file sink defaults to `app_data_dir()/logs` (7-day retention), webview→main IPC command `nocturna_log` with per-module logger cache |
+| `nocturna-logger` (`logger/python/`) | Python | `create_logger(module, ...)`, `sys.excepthook` + `threading.excepthook` handlers per §14.8; stdlib only |
+| `nocturna/logger` (`logger/php/`) | PHP 8.1+ | `LoggerFactory::create(LoggerOptions)`, `$log(...)` invoke shorthand, exception/error/shutdown handlers per §14.8; ext-json only |
 
 All six packages share one version across releases (enforced by the version-parity check in CI
-and `scripts/check-versions.mjs`).
+and `scripts/check-versions.mjs`). Distribution: the npm packages publish to a private registry;
+the Rust, Python, and PHP packages have no registry — **git tags are their distribution** (see
+README, "Installing the Loggers").
 
-> **Dependency direction is one-way:** the core package must never import Electron. This is the same
-> rule as Nebula's `src/core/` (which expresses host needs through `ports.ts`) and dnd-platform §13
-> (handlers report through the `JobProgressReporter` service, never writing storage directly).
+> **Dependency direction is one-way:** the core package must never import Electron. Host-specific
+> packages (`logger/electron/`, `logger/rust-tauri/`) depend on the core — never the reverse.
 
 ### 14.10 Non-TypeScript Stacks
 
@@ -471,10 +461,13 @@ no-swallowed-errors rules.
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.9.0 | 2026-11-27 | Distribution: symlink model replaced — the doc is now installed as a stamped, read-only snapshot via the `@nocturna/standards` npm package, the `nocturna-standards` cargo CLI, or `standards/agents/install.sh`; header rewritten accordingly. Versioning: switched to semver (X.Y.Z) and this header is now the single source of truth for the standards version — `agents/VERSION` retired; the installer stamp and both installer packages derive from it. |
+| 1.8 | 2026-11-27 | §14.2: `SILENT` documented as a disable switch, not a numeric comparison; dev-detection signals corrected (`VITE_DEV_SERVER_URL`, not `process.dev`). §14.4: Biome config mirrors the shipped fragment (`noConsole` with `allow: []`, 2.5 schema). §14.6: substring key-match semantics specified (over-redaction by design); redaction covers `meta.error`. §14.9: registry labels corrected — Rust/Python/PHP distribute via git tags. §7: coverage floor raised to 90/80. §10: de-platformed (Bugsink/Uptrace narrative removed) and now points to §14. §13 removed (platform-specific; number reserved). §8.4: misplaced TypeScript bullet removed; Python file ceiling reconciled with §2. §3, §8.1, §11, §12 aligned with practice. |
 | 1.7 | 2026-08-29 | §14 Structured Logging: canonical level set, prod=ERROR floor, no-swallowed-errors rule + lint configs, redaction, file sink retention, global handlers. Canonical location directive (symlink, not copy). Reference `@nocturna/logger` + `@nocturna/logger-electron` packages. |
 | 1.6 | 2026-08-29 | §10 Added Uptrace upgrade path (full observability: traces, metrics, logs, alerting) for when platform outgrows Bugsink. |
 | 1.5 | 2026-08-26 | §10 Switched from OpenTelemetry-first to Sentry/Bugsink error reporting; added configuration-layer and fail-loudly guidance. |
 | 1.4 | 2026-07-31 | §13 Worker Job Progress Reporting (binding rule: every `JobDefinition` emits standardized progress per `design/infrastructure/job-progress-reporting.md`). |
+| 1.3 | — | *Entry not recorded — gap in changelog history.* |
 | 1.2 | 2026-07-11 | §8.1 Prettier 3 + mandatory `prettier-plugin-svelte` (`trailingComma: "es5"` and `printWidth: 100` retained); §2 line length explicitly delegated to formatters. |
 | 1.1 | 2026-07-11 | PHP floor → 8.3 (§5); Effect Schema / Standard Schema (§5); Svelte 5 runes (§8.1); OpenTelemetry-first observability (§10); supply-chain audits (§9). |
 | 1.0 | — | Initial version |

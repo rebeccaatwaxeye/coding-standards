@@ -12,7 +12,7 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
 
-  electron:
+  logger/electron:
     dependencies:
       '@nocturna/logger':
         specifier: workspace:*
@@ -37,7 +37,7 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@20.19.43)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.27.7))
 
-  node:
+  logger/node:
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.5.11
@@ -54,6 +54,18 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@types/node@20.19.43)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.27.7))
+
+  standards/npm:
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^2.5.11
+        version: 2.5.11
+      '@vitest/coverage-v8':
+        specifier: ^4.1.11
+        version: 4.1.11(vitest@4.1.11)
       vitest:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@20.19.43)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.27.7))

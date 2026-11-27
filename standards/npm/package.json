@@ -1,0 +1,40 @@
+{
+  "name": "@nocturna/standards",
+  "version": "1.9.0",
+  "description": "Installs the Nocturna coding standards (AGENTS.md, language slices, CODING_STANDARDS.md) into a repository",
+  "type": "module",
+  "bin": {
+    "nocturna-standards": "./bin/nocturna-standards.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "assets"
+  ],
+  "publishConfig": {
+    "registry": "https://nocturna.dev/coding-standards/~npm/",
+    "access": "public"
+  },
+  "scripts": {
+    "sync-assets": "node scripts/sync-assets.mjs",
+    "prepack": "node scripts/sync-assets.mjs",
+    "pretest": "node scripts/sync-assets.mjs",
+    "test": "vitest run --coverage",
+    "lint": "biome check bin lib scripts",
+    "format": "biome format --write bin lib scripts"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.11",
+    "@vitest/coverage-v8": "^4.1.11",
+    "vitest": "^4.1.11"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rebeccaatwaxeye/coding-standards.git",
+    "directory": "standards/npm"
+  }
+}

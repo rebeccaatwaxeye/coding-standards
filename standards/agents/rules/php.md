@@ -1,6 +1,6 @@
 # PHP (Laravel)
 
-> Applies to: Laravel, PHP 8.2+, general PHP services.
+> Applies to: Laravel, PHP 8.3+, general PHP services.
 > Load alongside the core `AGENTS.md`.
 
 ## Toolchain

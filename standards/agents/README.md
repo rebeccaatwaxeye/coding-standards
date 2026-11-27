@@ -14,22 +14,23 @@ wasteful in a context window. Agents have different constraints:
 | Changelog | Tracks document history | Removed — agents don't need history |
 | Language rules | All four inline | Split into slices, loaded on demand |
 | Voice | Explanatory | Imperative |
-| Size | 459 lines, always | ~200 core + ~60 per language |
+| Size | ~470 lines, always | ~180 core + ~70–105 per language |
 
-**Net effect:** an agent editing a Python file loads ~260 lines instead of 459,
+**Net effect:** an agent editing a Python file loads ~285 lines instead of ~470,
 and never spends tokens on Rust rules.
 
 ## Layout
 
 ```
-agents/
+standards/agents/
 ├── AGENTS.md              Core universal rules — always loaded
 ├── rules/
 │   ├── typescript.md      Loaded when editing .ts/.js/.svelte/.astro
 │   ├── php.md             Loaded when editing .php
 │   ├── rust.md            Loaded when editing .rs
 │   └── python.md          Loaded when editing .py
-├── install.sh             Installs into a repo, generates .cursorrules
+├── install.sh             Bash installer — stamps files, generates .cursorrules
+├── bootstrap.sh           Self-fetching installer (curl | bash, no clone needed)
 └── README.md              This file
 ```
 
@@ -39,11 +40,22 @@ then lazy-loads the slice for the file it is editing.
 
 ## Install into a repository
 
+Three routes, all producing byte-identical files (see "Versioning" below). No
+clone of the coding-standards repo is required for any of them:
+
 ```bash
-# From a checkout of coding-standards
-./agents/install.sh ../my-api typescript
-./agents/install.sh ../my-api typescript python   # multiple languages
-./agents/install.sh ../my-api                     # all four
+# npm (TypeScript/JavaScript projects) — needs the @nocturna scope in ~/.npmrc
+pnpm dlx @nocturna/standards install . typescript
+
+# cargo (Rust projects) — fetches the repo internally
+cargo install --git https://nocturna.dev/coding-standards.git --tag standards-vX.Y.Z nocturna-standards
+nocturna-standards install . rust
+
+# bash (any project) — self-fetching bootstrap
+curl -sSL https://raw.githubusercontent.com/rebeccaatwaxeye/coding-standards/main/standards/agents/bootstrap.sh | bash -s -- . python
+
+# from a checkout of coding-standards
+./standards/agents/install.sh ../my-api typescript
 ```
 
 This installs:
@@ -51,39 +63,42 @@ This installs:
 | File | Purpose |
 |---|---|
 | `AGENTS.md` | Core rules at repo root, where agents look for it (stamped with the standards version) |
+| `CODING_STANDARDS.md` | The full human-readable document, stamped (read-only snapshot) |
 | `agents/rules/*.md` | The selected language slices |
 | `agents/standards.json` | Manifest: standards version + installed languages |
 | `.cursorrules` | Generated: core + selected slices concatenated |
 
 ## Versioning
 
-The standards version lives in `agents/VERSION`. `install.sh` stamps it into
-the installed `AGENTS.md` and records it — with the installed languages — in
-`agents/standards.json` in the target repo.
+The standards version lives in **one place**: the `**Version:**` header of
+`CODING_STANDARDS.md`. The installers parse it at install time and stamp it into
+the installed `AGENTS.md`, `CODING_STANDARDS.md`, and `agents/standards.json`.
+The `@nocturna/standards` npm package and the `nocturna-standards` cargo crate
+carry the same version (enforced by `scripts/check-versions.mjs` and a cargo
+test that compares the crate version against the doc).
 
 Check whether an installed repo is current (non-zero exit if not):
 
 ```bash
-./agents/install.sh --status ../my-api
-# standards: v1.0.0 — UP TO DATE
+nocturna-standards status ../my-api        # or: ./standards/agents/install.sh --status ../my-api
+# standards: v1.9.0 — UP TO DATE
 #   typescript: OK
-#   python: OK
 #   core AGENTS.md: OK
+#   CODING_STANDARDS.md: OK
 #   .cursorrules: OK
 ```
 
-`--status` detects three kinds of drift: a **stale version** (source `VERSION`
-is newer), **modified files** (installed copies edited or partially updated),
-and **missing files**. Fix all of them by re-running the install command it
-prints. The exit code makes it CI-friendly:
+`status` detects three kinds of drift: a **stale version** (source doc is
+newer), **modified files** (installed copies edited or partially updated), and
+**missing files**. Fix all of them by re-running the install command it prints.
+The exit code makes it CI-friendly:
 
 ```bash
-./agents/install.sh --status . || echo "standards out of date — re-run installer"
+nocturna-standards status . || echo "standards out of date — re-run the installer"
 ```
 
-Bump `VERSION` whenever `AGENTS.md` or any slice changes. The standards
-version is independent of the logger package versions in `node/` and
-`electron/`.
+The standards version is independent of the logger package versions in
+`logger/node/` and `logger/electron/`.
 
 ### Why `.cursorrules` is generated
 
@@ -107,11 +122,12 @@ agents. `.cursorrules` covers Cursor, which predates that convention.
 
 ## Updating
 
-1. Edit the canonical `CODING_STANDARDS.md`.
+1. Edit the canonical `CODING_STANDARDS.md` and bump its `**Version:**` header.
 2. Mirror the change into `AGENTS.md` and the relevant `rules/*.md`.
-3. Bump `agents/VERSION`.
-4. Re-run `install.sh` in each consuming repo (or tell them to run
-   `install.sh --status` first).
+3. Run `scripts/release-standards.sh` — it syncs the package versions from the
+   doc, runs the gates, and tags `standards-vX.Y.Z`.
+4. Consumers update the installer (`pnpm update`, newer `--tag`/`--ref`) and
+   re-run `install` — or run `status` first to see the drift.
 
 Both files describe the same rules. If they ever disagree, the canonical
 `CODING_STANDARDS.md` wins — report the discrepancy.

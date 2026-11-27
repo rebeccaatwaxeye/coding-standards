@@ -36,21 +36,21 @@ echo "Bumping all six packages to $VERSION ..."
 node -e "
 const fs = require('fs');
 const files = [
-  'node/package.json',
-  'electron/package.json',
-  'php/composer.json',
+  'logger/node/package.json',
+  'logger/electron/package.json',
+  'logger/php/composer.json',
 ];
 for (const p of files) {
   const json = JSON.parse(fs.readFileSync(p, 'utf8'));
   json.version = '$VERSION';
   fs.writeFileSync(p, JSON.stringify(json, null, 2) + '\n');
 }
-for (const p of ['rust-cli/Cargo.toml', 'rust-tauri/Cargo.toml']) {
+for (const p of ['logger/rust-cli/Cargo.toml', 'logger/rust-tauri/Cargo.toml']) {
   let s = fs.readFileSync(p, 'utf8');
   s = s.replace(/^version = \"[^\"]+\"/m, 'version = \"$VERSION\"');
   fs.writeFileSync(p, s);
 }
-const pyproj = 'python/pyproject.toml';
+const pyproj = 'logger/python/pyproject.toml';
 let py = fs.readFileSync(pyproj, 'utf8');
 py = py.replace(/^version = \"[^\"]+\"/m, 'version = \"$VERSION\"');
 fs.writeFileSync(pyproj, py);
@@ -61,7 +61,7 @@ pnpm -r run lint
 pnpm -r run build
 pnpm -r run test
 
-git add node/package.json electron/package.json rust-cli/Cargo.toml rust-tauri/Cargo.toml python/pyproject.toml php/composer.json
+git add logger/node/package.json logger/electron/package.json logger/rust-cli/Cargo.toml logger/rust-tauri/Cargo.toml logger/python/pyproject.toml logger/php/composer.json
 git commit -m "chore(release): v$VERSION"
 git tag -a "v$VERSION" -m "Release v$VERSION"
 

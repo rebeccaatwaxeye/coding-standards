@@ -50,10 +50,12 @@ jobs:
       shell: sh
       commands: |
         set -e
-        cd node
+        cd logger/node
         node_modules/.bin/biome check src/
         cd ../electron
         node_modules/.bin/biome check src/
+        cd ../../standards/npm
+        node_modules/.bin/biome check bin lib scripts
     runAs: 0:0
     useTTY: true
     condition: SUCCESSFUL
@@ -67,7 +69,7 @@ jobs:
       shell: sh
       commands: |
         set -e
-        cd node
+        cd logger/node
         node_modules/.bin/tsup
         cd ../electron
         node_modules/.bin/tsup
@@ -84,7 +86,7 @@ jobs:
       shell: sh
       commands: |
         set -e
-        cd node
+        cd logger/node
         node_modules/.bin/tsc --noEmit
         cd ../electron
         node_modules/.bin/tsc --noEmit
@@ -101,9 +103,11 @@ jobs:
       shell: sh
       commands: |
         set -e
-        cd node
+        cd logger/node
         timeout 90s node_modules/.bin/vitest run --testTimeout=15000 --no-file-parallelism --reporter=verbose
         cd ../electron
+        timeout 90s node_modules/.bin/vitest run --testTimeout=15000 --no-file-parallelism --reporter=verbose
+        cd ../../standards/npm
         timeout 90s node_modules/.bin/vitest run --testTimeout=15000 --no-file-parallelism --reporter=verbose
     runAs: 0:0
     useTTY: true
@@ -119,10 +123,13 @@ jobs:
       commands: |
         set -e
         rustup component add rustfmt clippy
-        cd rust-cli
+        cd logger/rust-cli
         cargo fmt --check
         cargo clippy --all-targets -- -D warnings
         cd ../rust-tauri
+        cargo fmt --check
+        cargo clippy --all-targets -- -D warnings
+        cd ../../standards/cli
         cargo fmt --check
         cargo clippy --all-targets -- -D warnings
     runAs: 0:0
@@ -138,9 +145,11 @@ jobs:
       shell: sh
       commands: |
         set -e
-        cd rust-cli
+        cd logger/rust-cli
         cargo test
         cd ../rust-tauri
+        cargo test
+        cd ../../standards/cli
         cargo test
     runAs: 0:0
     useTTY: true
@@ -156,7 +165,7 @@ jobs:
       commands: |
         set -e
         pip install --quiet ruff
-        cd python
+        cd logger/python
         ruff check .
     runAs: 0:0
     useTTY: true
@@ -172,7 +181,7 @@ jobs:
       commands: |
         set -e
         pip install --quiet pytest pytest-cov
-        cd python
+        cd logger/python
         python -m pytest --cov=nocturna_logger --cov-branch --cov-fail-under=90
     runAs: 0:0
     useTTY: true
@@ -187,7 +196,7 @@ jobs:
       shell: sh
       commands: |
         set -e
-        cd php
+        cd logger/php
         composer install --no-interaction --quiet
         vendor/bin/phpunit
     runAs: 0:0

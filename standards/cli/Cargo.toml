@@ -1,0 +1,20 @@
+[package]
+name = "nocturna-standards"
+version = "1.9.0"
+edition = "2021"
+description = "Installs the Nocturna coding standards (AGENTS.md, language slices, CODING_STANDARDS.md) into a repository"
+license = "MIT"
+
+[dependencies]
+serde_json = "1"
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+dbg_macro = "deny"
+# print_stdout/print_stderr are intentionally NOT denied: this crate is a CLI,
+# so user-facing output is its purpose (the §8.3 lint set targets application
+# and library code; the documented exception applies here).

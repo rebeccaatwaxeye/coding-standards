@@ -54,7 +54,7 @@ jobs:
       - name: Build Python sdist and wheel
         run: |
           python -m pip install --quiet build
-          python -m build --outdir release-assets python
+          python -m build --outdir release-assets logger/python
 
       - name: Create release with assets
         env:

@@ -1,6 +1,7 @@
 packages:
-  - 'node'
-  - 'electron'
+  - 'logger/node'
+  - 'logger/electron'
+  - 'standards/npm'
 onlyBuiltDependencies:
   - esbuild
 ignoredBuiltDependencies:

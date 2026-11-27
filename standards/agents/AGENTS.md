@@ -4,7 +4,7 @@
 >
 > · `rules/typescript.md` · `rules/php.md` · `rules/rust.md` · `rules/python.md` ·
 >
-> Version 1.7 · Canonical human-readable source: `~/Code/coding-standards/CODING_STANDARDS.md`
+> Version 1.9.0 · Canonical human-readable source: `~/Code/coding-standards/standards/CODING_STANDARDS.md`
 
 ---
 
@@ -115,6 +115,8 @@ Validate at every boundary where data enters: HTTP handlers, queue consumers, CL
 | **Production** | **`ERROR`** | **`ERROR` + `CRITICAL`** |
 | Override | `LOG_LEVEL` | case-insensitive env var, wins over all defaults |
 
+**`SILENT` is a disable switch, not a severity point** — it suppresses everything and must be special-cased, never compared numerically.
+
 **Production is `ERROR`, never `SILENT`.** Silencing production logs to reduce noise hides the failures you most need.
 
 ### 9.3 Logger Contract
@@ -144,6 +146,8 @@ When catching to add context, **preserve the cause** (JS `cause`, Python `raise 
 
 Never log: passwords, tokens, secrets, credentials, API keys, authorization headers, cookies, session IDs, JWTs, OTPs, private keys.
 
+Matching is case-insensitive substring on the key (`sessionId` matches `session`) — over-redaction is by design. Redaction applies to `data` and `error` payloads; values are redacted by key only, never by string content.
+
 This is enforced by the logger, not by caller discipline. Do not disable it.
 
 ### 9.6 Retention & Global Handlers
@@ -172,13 +176,3 @@ Review **behaviour**, not syntax — tooling owns syntax.
 - Flag new dependencies for justification.
 - Ask for split-out when formatting changes are mixed with behaviour.
 - Do not approve without understanding the change.
-
----
-
-## 12. Worker Job Progress Reporting
-
-Long-running jobs report progress so operators can distinguish stalled from slow.
-
-- Emit progress at meaningful checkpoints: `queued`, `started`, `progress`, `completed`, `failed`.
-- Include `jobId`, counts done/total, and current phase.
-- A job that emits nothing for longer than its heartbeat is considered stalled.
