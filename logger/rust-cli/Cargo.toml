@@ -4,7 +4,7 @@ version = "0.1.7"
 edition = "2021"
 description = "Zero-config structured logger for Rust — reference implementation of the Nocturna logging spec (§14)"
 license = "MIT"
-repository = "https://github.com/nocturna/logger"
+repository = "https://github.com/rebeccaatwaxeye/coding-standards"
 keywords = ["logger", "logging", "structured", "tracing"]
 categories = ["development-tools::debugging"]
 

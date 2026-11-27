@@ -4,7 +4,7 @@ version = "0.1.7"
 edition = "2021"
 description = "Tauri-specific logger extensions — app-data file sink, IPC bridge, and panic handlers for the Nocturna logging spec"
 license = "MIT"
-repository = "https://github.com/nocturna/logger"
+repository = "https://github.com/rebeccaatwaxeye/coding-standards"
 keywords = ["logger", "tauri", "ipc", "structured"]
 categories = ["development-tools::debugging"]
 

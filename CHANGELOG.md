@@ -2,6 +2,20 @@
 
 Notable changes to the `@nocturna/logger` packages and their release pipeline.
 
+## 0.1.8
+
+### Repository
+
+- Repo restructured into `standards/` and `logger/` top-level folders. No code
+  changes to any package. Git-tag installs must match the new layout: pip uses
+  `#subdirectory=logger/python`; cargo git dependencies and Composer VCS installs
+  are unaffected (resolved through the root workspace/manifests). Tags up to
+  v0.1.7 keep the old layout and keep working as pinned.
+- `repository` metadata in the npm and cargo manifests corrected to point at the
+  real repository and new package directories.
+- CI: the monolithic job split into four parallel jobs (ts / rust / python / php);
+  Publish pipeline unchanged.
+
 ## 0.1.7
 
 ### Release pipeline

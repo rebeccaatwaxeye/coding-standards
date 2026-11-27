@@ -54,7 +54,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nocturna/logger.git",
-    "directory": "electron"
+    "url": "https://github.com/rebeccaatwaxeye/coding-standards.git",
+    "directory": "logger/electron"
   }
 }
