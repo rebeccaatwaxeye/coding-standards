@@ -70,7 +70,7 @@ pnpm -r run lint
 pnpm -r run build
 pnpm -r run test
 
-git add logger/node/package.json logger/electron/package.json logger/rust-cli/Cargo.toml logger/rust-tauri/Cargo.toml logger/python/pyproject.toml logger/php/composer.json
+git add logger/node/package.json logger/electron/package.json logger/rust-cli/Cargo.toml logger/rust-tauri/Cargo.toml logger/python/pyproject.toml logger/php/composer.json Cargo.lock
 git commit -m "chore(release): v$VERSION"
 git tag -a "v$VERSION" -m "Release v$VERSION"
 

@@ -57,7 +57,7 @@ echo "Running gates: standards npm tests, cargo tests ..."
 pnpm --filter @nocturna/standards test
 cargo test -p nocturna-standards
 
-git add standards/npm/package.json standards/cli/Cargo.toml standards/cli/assets
+git add standards/npm/package.json standards/cli/Cargo.toml standards/cli/assets Cargo.lock
 if git diff --cached --quiet; then
   echo "Package manifests already at $VERSION — nothing to commit."
 else
