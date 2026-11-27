@@ -50,6 +50,15 @@ for (const p of ['logger/rust-cli/Cargo.toml', 'logger/rust-tauri/Cargo.toml']) 
   s = s.replace(/^version = \"[^\"]+\"/m, 'version = \"$VERSION\"');
   fs.writeFileSync(p, s);
 }
+// rust-tauri's path dependency on rust-cli carries a version requirement for
+// cargo publish — keep it in lockstep with the release version.
+const tauriToml = 'logger/rust-tauri/Cargo.toml';
+let tauri = fs.readFileSync(tauriToml, 'utf8');
+tauri = tauri.replace(
+  /(nocturna-logger = \{ path = \"\.\.\/rust-cli\", version = \")[^\"]+(\")/,
+  (match, prefix, suffix) => prefix + '$VERSION' + suffix,
+);
+fs.writeFileSync(tauriToml, tauri);
 const pyproj = 'logger/python/pyproject.toml';
 let py = fs.readFileSync(pyproj, 'utf8');
 py = py.replace(/^version = \"[^\"]+\"/m, 'version = \"$VERSION\"');
