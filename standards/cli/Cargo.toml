@@ -1,6 +1,6 @@
 [package]
 name = "nocturna-standards"
-version = "1.9.0"
+version = "1.9.1"
 edition = "2021"
 description = "Installs the Nocturna coding standards (AGENTS.md, language slices, CODING_STANDARDS.md) into a repository"
 license = "MIT"
