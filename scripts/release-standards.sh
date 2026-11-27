@@ -47,6 +47,9 @@ s = s.replace(/^version = \"[^\"]+\"/m, 'version = \"$VERSION\"');
 fs.writeFileSync(toml, s);
 "
 
+echo "Syncing CLI assets ..."
+standards/cli/sync-assets.sh
+
 echo "Verifying version parity ..."
 node scripts/check-versions.mjs
 
@@ -54,7 +57,7 @@ echo "Running gates: standards npm tests, cargo tests ..."
 pnpm --filter @nocturna/standards test
 cargo test -p nocturna-standards
 
-git add standards/npm/package.json standards/cli/Cargo.toml
+git add standards/npm/package.json standards/cli/Cargo.toml standards/cli/assets
 if git diff --cached --quiet; then
   echo "Package manifests already at $VERSION — nothing to commit."
 else
@@ -66,3 +69,4 @@ echo
 echo "Released $TAG. Publish it with:"
 echo "  git push origin main $TAG"
 echo "  pnpm --filter @nocturna/standards publish --no-git-checks"
+echo "  (cd standards/cli && cargo publish --registry nocturna)"

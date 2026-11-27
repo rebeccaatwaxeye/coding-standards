@@ -4,6 +4,7 @@ version = "1.9.1"
 edition = "2021"
 description = "Installs the Nocturna coding standards (AGENTS.md, language slices, CODING_STANDARDS.md) into a repository"
 license = "MIT"
+repository = "https://github.com/rebeccaatwaxeye/coding-standards"
 
 [dependencies]
 serde_json = "1"

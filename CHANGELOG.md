@@ -15,6 +15,10 @@ Notable changes to the `@nocturna/logger` packages and their release pipeline.
   real repository and new package directories.
 - CI: the monolithic job split into four parallel jobs (ts / rust / python / php);
   Publish pipeline unchanged.
+- Publishing: logger packages now also publish to the OneDev PyPI and Cargo
+  registries — 0.1.8 is the first release on both (published manually; the Publish
+  job gained `publish-pypi` / `publish-cargo` steps for future releases). Git tags
+  remain the PHP distribution and a fallback for the rest.
 
 ## 0.1.7
 

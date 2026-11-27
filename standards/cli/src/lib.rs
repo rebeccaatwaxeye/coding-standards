@@ -11,17 +11,14 @@
 use std::fs;
 use std::path::Path;
 
-const AGENTS_MD: &str = include_str!("../../agents/AGENTS.md");
-const STANDARDS_DOC: &str = include_str!("../../CODING_STANDARDS.md");
+const AGENTS_MD: &str = include_str!("../assets/AGENTS.md");
+const STANDARDS_DOC: &str = include_str!("../assets/CODING_STANDARDS.md");
 
 const RULES: [(&str, &str); 4] = [
-    (
-        "typescript",
-        include_str!("../../agents/rules/typescript.md"),
-    ),
-    ("php", include_str!("../../agents/rules/php.md")),
-    ("rust", include_str!("../../agents/rules/rust.md")),
-    ("python", include_str!("../../agents/rules/python.md")),
+    ("typescript", include_str!("../assets/rules/typescript.md")),
+    ("php", include_str!("../assets/rules/php.md")),
+    ("rust", include_str!("../assets/rules/rust.md")),
+    ("python", include_str!("../assets/rules/python.md")),
 ];
 
 /// Languages with an installable rules slice.
@@ -333,6 +330,33 @@ mod tests {
     fn version_matches_crate_version() {
         // Pins Cargo.toml to the canonical document — the single source of truth.
         assert_eq!(source_version().unwrap(), env!("CARGO_PKG_VERSION"));
+    }
+
+    #[test]
+    fn assets_match_canonical_sources() {
+        // Drift guard: assets/ are committed copies of standards/agents/ + the
+        // doc, refreshed by sync-assets.sh. Sources only exist in the repo, so
+        // pairs are skipped when absent (e.g. tests run from a packaged crate).
+        let manifest = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let pairs: [(&str, &str); 6] = [
+            ("../agents/AGENTS.md", AGENTS_MD),
+            ("../CODING_STANDARDS.md", STANDARDS_DOC),
+            ("../agents/rules/typescript.md", RULES[0].1),
+            ("../agents/rules/php.md", RULES[1].1),
+            ("../agents/rules/rust.md", RULES[2].1),
+            ("../agents/rules/python.md", RULES[3].1),
+        ];
+        for (rel, embedded) in pairs {
+            let path = manifest.join(rel);
+            if !path.exists() {
+                continue;
+            }
+            let source = fs::read_to_string(&path).unwrap();
+            assert_eq!(
+                source, embedded,
+                "{rel} differs from the embedded asset — run standards/cli/sync-assets.sh"
+            );
+        }
     }
 
     #[test]
