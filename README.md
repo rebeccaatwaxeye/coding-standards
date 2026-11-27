@@ -139,10 +139,10 @@ Agents working in this repo should read [AGENTS.md](AGENTS.md).
 
 ## CI & Publishing
 
-- **CI** (OneDev, `.onedev-buildspec.yml`) runs on every branch update:
-  npm lint → build → typecheck → test (logger + standards packages), then Rust
-  lint/test (loggers + standards CLI), Python lint/test (90% gate), and PHP
-  PHPUnit for the reference implementations.
+- **CI** (OneDev, `.onedev-buildspec.yml`) runs on every branch update as four
+  parallel jobs: `ts` (lint → build → typecheck → test for the logger + standards
+  packages), `rust` (fmt/clippy → test for the loggers + standards CLI), `python`
+  (ruff → pytest, 90% gate), and `php` (PHPUnit).
 - **Logger releases** trigger on `v*` tags (`./scripts/release.sh X.Y.Z`): version
   parity across all six packages (`scripts/check-versions.mjs`), build, smoke-test
   of the packed TS tarballs, then npm core **before** electron (electron's
