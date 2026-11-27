@@ -1,6 +1,0 @@
-Metadata-Version: 2.4
-Name: nocturna-logger
-Version: 0.1.8
-Summary: Zero-config structured logger for Python — reference implementation of the Nocturna logging spec (§14)
-License: MIT
-Requires-Python: >=3.9

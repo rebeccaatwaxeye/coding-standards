@@ -10,3 +10,4 @@ __pycache__/
 vendor/
 .phpunit.result.cache
 logger/php/phpunit.phar
+*.egg-info/

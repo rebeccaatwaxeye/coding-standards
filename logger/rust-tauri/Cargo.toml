@@ -9,7 +9,7 @@ keywords = ["logger", "tauri", "ipc", "structured"]
 categories = ["development-tools::debugging"]
 
 [dependencies]
-nocturna-logger = { path = "../rust-cli", version = "0.1.8" }
+nocturna-logger = { path = "../rust-cli", version = "0.1.8", registry = "nocturna" }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 # Optional: enable the "tauri" feature for the AppHandle file-sink wrapper

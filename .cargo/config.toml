@@ -1,0 +1,7 @@
+# The private OneDev cargo registry. Required so the workspace can resolve
+# `registry = "nocturna"` dependencies (rust-tauri -> rust-cli when published).
+# Local development uses path dependencies and never contacts this registry;
+# a token (CARGO_REGISTRIES_NOCTURNA_TOKEN) is only needed to publish, or to
+# consume the published crates since the registry requires auth for reads.
+[registries.nocturna]
+index = "sparse+https://nocturna.dev/coding-standards/~cargo/"
