@@ -1,6 +1,6 @@
 [package]
 name = "nocturna-logger-tauri"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 description = "Tauri-specific logger extensions — app-data file sink, IPC bridge, and panic handlers for the Nocturna logging spec"
 license = "MIT"
@@ -9,7 +9,7 @@ keywords = ["logger", "tauri", "ipc", "structured"]
 categories = ["development-tools::debugging"]
 
 [dependencies]
-nocturna-logger = { path = "../rust-cli", version = "0.1.8", registry = "nocturna" }
+nocturna-logger = { path = "../rust-cli", version = "0.1.9", registry = "nocturna" }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 # Optional: enable the "tauri" feature for the AppHandle file-sink wrapper
