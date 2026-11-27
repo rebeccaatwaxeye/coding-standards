@@ -8,7 +8,7 @@ This repository is **not a normal application**. It contains two distinct delive
    - `standards/CODING_STANDARDS.md` — the canonical, human-written standards document (~470 lines, §-numbered sections). **This is the source of truth**, and its `**Version:**` header is the single source of truth for the standards version.
    - `standards/agents/` — an agent-optimised rewrite of the same standards: `AGENTS.md` (core rules), `rules/{typescript,php,rust,python}.md` (lazy-loaded language slices), `install.sh` (bash installer), `bootstrap.sh` (self-fetching curl installer).
    - `standards/npm/` — `@nocturna/standards` npm package: a zero-dep Node CLI (`nocturna-standards install|status`) that installs the same files.
-   - `standards/cli/` — `nocturna-standards` cargo CLI (same commands, content embedded via `include_str!`), installed with `cargo install --git`.
+   - `standards/cli/` — `nocturna-standards` cargo CLI (same commands, content embedded via `include_str!` from committed `assets/` copies — `sync-assets.sh` refreshes them and a drift test fails CI if they go stale), installed with `cargo install nocturna-standards --registry nocturna` (`--git` fallback).
 
 2. **`logger/` — the reference implementations** of the standards' structured-logging spec (§14.9) — one per stack, all sharing one version per release and producing **byte-identical output** (parity fixtures asserted in every test suite):
    - `logger/node/` → `@nocturna/logger` — zero-dependency core logger (Node + browser)

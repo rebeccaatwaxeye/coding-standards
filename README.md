@@ -53,12 +53,15 @@ pnpm dlx @nocturna/standards install . typescript
 pnpm add -D @nocturna/standards && pnpm exec nocturna-standards install . typescript
 ```
 
-**Rust** — cargo fetches the repository internally; no clone you manage:
+**Rust** — from the private cargo registry (same `[registries.nocturna]` config
+and token as the logger crates — see "Installing the Loggers"):
 
 ```bash
-cargo install --git https://nocturna.dev/coding-standards.git --tag standards-v1.9.0 nocturna-standards
+cargo install nocturna-standards --registry nocturna
 nocturna-standards install . rust
 ```
+
+Fallback without registry access: `cargo install --git https://nocturna.dev/coding-standards.git --tag standards-vX.Y.Z nocturna-standards`.
 
 **Python / PHP / anything with bash** — self-fetching bootstrap:
 

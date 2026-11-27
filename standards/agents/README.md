@@ -47,8 +47,9 @@ clone of the coding-standards repo is required for any of them:
 # npm (TypeScript/JavaScript projects) — needs the @nocturna scope in ~/.npmrc
 pnpm dlx @nocturna/standards install . typescript
 
-# cargo (Rust projects) — fetches the repo internally
-cargo install --git https://nocturna.dev/coding-standards.git --tag standards-vX.Y.Z nocturna-standards
+# cargo (Rust projects) — from the private registry (needs the [registries.nocturna]
+# config + token documented in the repo README); --git is the fallback
+cargo install nocturna-standards --registry nocturna
 nocturna-standards install . rust
 
 # bash (any project) — self-fetching bootstrap
