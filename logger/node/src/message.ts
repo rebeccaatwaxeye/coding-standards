@@ -34,7 +34,7 @@ export function normaliseError(err: unknown): LogError | undefined {
 			name: err.name,
 			message: err.message,
 			stack: err.stack,
-			code: isRecord(err) && typeof err.code === 'string' ? err.code : undefined,
+			code: isRecord(err) && typeof err.code === 'string' ? err.code : undefined
 		}
 	}
 	if (typeof err === 'string') {
@@ -45,7 +45,7 @@ export function normaliseError(err: unknown): LogError | undefined {
 			name: String(err.name ?? 'Error'),
 			message: String(err.message ?? JSON.stringify(err)),
 			stack: typeof err.stack === 'string' ? err.stack : undefined,
-			code: typeof err.code === 'string' ? err.code : undefined,
+			code: typeof err.code === 'string' ? err.code : undefined
 		}
 	}
 	return { name: 'Error', message: String(err) }

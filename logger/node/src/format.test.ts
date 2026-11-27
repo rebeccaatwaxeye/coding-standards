@@ -8,7 +8,7 @@ function makeEntry(overrides: Partial<LogEntry> = {}): LogEntry {
 		level: 'INFO',
 		module: 'api',
 		message: 'server listening',
-		...overrides,
+		...overrides
 	}
 }
 
@@ -33,8 +33,8 @@ describe('formatPlainText', () => {
 			makeEntry({
 				traceId: 'abc',
 				operation: 'boot',
-				error: { name: 'Error', message: 'boom' },
-			}),
+				error: { name: 'Error', message: 'boom' }
+			})
 		)
 		expect(line.trimEnd().endsWith('{traceId=abc, op=boot, error=boom}')).toBe(true)
 	})
@@ -49,7 +49,7 @@ describe('formatJson', () => {
 			ts: '01-02-2026 14:05:32',
 			level: 'INFO',
 			module: 'api',
-			msg: 'server listening',
+			msg: 'server listening'
 		})
 	})
 
@@ -70,9 +70,9 @@ describe('formatJson', () => {
 					traceId: 't1',
 					operation: 'op1',
 					data: { x: 1 },
-					error: { name: 'Error', message: 'boom' },
-				}),
-			),
+					error: { name: 'Error', message: 'boom' }
+				})
+			)
 		) as Record<string, unknown>
 		expect(parsed.loc).toBe('a.ts:1')
 		expect(parsed.traceId).toBe('t1')
@@ -94,7 +94,7 @@ describe('formatAnsi', () => {
 			['INFO', '\x1b[32m', 'ℹ️'],
 			['WARN', '\x1b[33m', '⚠️'],
 			['ERROR', '\x1b[31m', '❌'],
-			['CRITICAL', '\x1b[35m', '🔥'],
+			['CRITICAL', '\x1b[35m', '🔥']
 		]
 		for (const [level, ansi, icon] of cases) {
 			const line = formatAnsi(makeEntry({ level }))

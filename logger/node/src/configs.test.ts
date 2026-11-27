@@ -19,7 +19,7 @@ describe('nocturnaLoggerRules (§14.4 config contract)', () => {
 	it('requires every caught error to be used', () => {
 		expect(nocturnaLoggerRules[0]!.rules['@typescript-eslint/no-unused-vars']).toEqual([
 			'error',
-			{ caughtErrors: 'all' },
+			{ caughtErrors: 'all' }
 		])
 	})
 

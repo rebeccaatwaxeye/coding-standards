@@ -13,7 +13,7 @@ function mockLogger() {
 		error: vi.fn(),
 		critical: vi.fn(),
 		dispose: vi.fn(),
-		module: 'test',
+		module: 'test'
 	} as unknown as Logger & {
 		debug: ReturnType<typeof vi.fn>
 		info: ReturnType<typeof vi.fn>

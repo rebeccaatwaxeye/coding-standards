@@ -30,7 +30,7 @@ describe('normaliseError', () => {
 		expect(result).toMatchObject({
 			name: 'Error',
 			message: 'boom',
-			code: 'E_TEST',
+			code: 'E_TEST'
 		})
 		expect(result?.stack).toContain('boom')
 	})
@@ -41,7 +41,7 @@ describe('normaliseError', () => {
 
 	it('reads fields from error-like records', () => {
 		expect(
-			normaliseError({ name: 'HttpError', message: '404', code: 'ENOTFOUND', stack: 'at x' }),
+			normaliseError({ name: 'HttpError', message: '404', code: 'ENOTFOUND', stack: 'at x' })
 		).toEqual({ name: 'HttpError', message: '404', code: 'ENOTFOUND', stack: 'at x' })
 	})
 
@@ -49,7 +49,7 @@ describe('normaliseError', () => {
 		expect(normaliseError({})).toEqual({ name: 'Error', message: '{}' })
 		expect(normaliseError({ message: 'only' })).toEqual({
 			name: 'Error',
-			message: 'only',
+			message: 'only'
 		})
 	})
 

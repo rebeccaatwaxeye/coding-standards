@@ -1,6 +1,14 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
 	"root": false,
+	"formatter": { "lineWidth": 100 },
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "asNeeded",
+			"trailingCommas": "none"
+		}
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {

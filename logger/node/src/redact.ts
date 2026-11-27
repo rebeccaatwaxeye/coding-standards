@@ -24,7 +24,7 @@ const DEFAULT_PATTERNS: RegExp[] = [
 	/cookie/i,
 	/session/i,
 	/jwt/i,
-	/otp/i,
+	/otp/i
 ]
 
 /**
@@ -67,13 +67,13 @@ function redactValue(value: unknown, patterns: RegExp[]): unknown {
  */
 export function redactEntry<T extends { data?: unknown; error?: unknown }>(
 	entry: T,
-	patterns: RegExp[],
+	patterns: RegExp[]
 ): T {
 	if (!patterns.length) return entry
 	return {
 		...entry,
 		data: entry.data !== undefined ? redactValue(entry.data, patterns) : undefined,
-		error: entry.error !== undefined ? redactValue(entry.error, patterns) : undefined,
+		error: entry.error !== undefined ? redactValue(entry.error, patterns) : undefined
 	}
 }
 

@@ -45,7 +45,7 @@ export function expectedCursorrules(assetsDir, version, langs) {
 		'# Edit AGENTS.md or rules/*.md in the source repo and re-run the installer.',
 		`# Installed languages: ${langs.join(' ')}`,
 		'',
-		expectedCore(assetsDir, version),
+		expectedCore(assetsDir, version)
 	]
 	let out = lines.join('\n')
 	for (const lang of langs) {
@@ -83,7 +83,7 @@ export function install(targetDir, langs, assetsDir) {
 
 	writeFileSync(join(targetDir, 'CODING_STANDARDS.md'), expectedStandardsDoc(assetsDir, version))
 	lines.push(
-		`  CODING_STANDARDS.md -> ${join(targetDir, 'CODING_STANDARDS.md')} (standards v${version})`,
+		`  CODING_STANDARDS.md -> ${join(targetDir, 'CODING_STANDARDS.md')} (standards v${version})`
 	)
 
 	for (const lang of langs) {
@@ -120,8 +120,8 @@ export function status(targetDir, assetsDir) {
 			ok: false,
 			lines: [
 				'NOT INSTALLED — no agents/standards.json found',
-				`Install with: nocturna-standards install ${targetDir} [lang ...]`,
-			],
+				`Install with: nocturna-standards install ${targetDir} [lang ...]`
+			]
 		}
 	}
 
@@ -157,7 +157,7 @@ export function status(targetDir, assetsDir) {
 		compareFile(
 			lang,
 			join(targetDir, 'agents', 'rules', `${lang}.md`),
-			readFileSync(slicePath, 'utf8'),
+			readFileSync(slicePath, 'utf8')
 		)
 	}
 
@@ -165,19 +165,19 @@ export function status(targetDir, assetsDir) {
 	compareFile(
 		'CODING_STANDARDS.md',
 		join(targetDir, 'CODING_STANDARDS.md'),
-		expectedStandardsDoc(assetsDir, version),
+		expectedStandardsDoc(assetsDir, version)
 	)
 
 	compareFile(
 		'.cursorrules',
 		join(targetDir, '.cursorrules'),
-		expectedCursorrules(assetsDir, version, manifest.langs),
+		expectedCursorrules(assetsDir, version, manifest.langs)
 	)
 
 	if (drift) {
 		lines.push(
 			'',
-			`Update needed: nocturna-standards install ${targetDir} ${manifest.langs.join(' ')}`,
+			`Update needed: nocturna-standards install ${targetDir} ${manifest.langs.join(' ')}`
 		)
 	}
 	return { ok: !drift, lines }

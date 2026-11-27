@@ -10,7 +10,7 @@
 | Formatter | Prettier 3 |
 | Linter | ESLint (flat config — `eslint.config.js`) |
 | Alternative | Biome 2.5 in place of Prettier + ESLint — `@nocturna/logger/configs` ships both config sets |
-| Config | `printWidth: 100`, `singleQuote: true`, `trailingComma: "es5"` |
+| Config | `printWidth: 100`, `singleQuote: true`, `semi: false`, `trailingComma: "none"` |
 | Svelte | Add `prettier-plugin-svelte` so `.svelte` files are formatted too |
 
 ## TypeScript

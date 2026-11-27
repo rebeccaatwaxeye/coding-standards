@@ -7,7 +7,7 @@ const LEVEL_ICON: Record<string, string> = {
 	INFO: 'ℹ️',
 	WARN: '⚠️',
 	ERROR: '❌',
-	CRITICAL: '🔥',
+	CRITICAL: '🔥'
 }
 
 const LEVEL_PAD = 8 // widest is "CRITICAL" = 8 chars
@@ -33,7 +33,7 @@ export function formatJson(entry: LogEntry): string {
 		ts: entry.timestamp,
 		level: entry.level,
 		module: entry.module,
-		msg: entry.message,
+		msg: entry.message
 	}
 	if (entry.location) obj.loc = entry.location
 	if (entry.traceId) obj.traceId = entry.traceId
@@ -51,7 +51,7 @@ const LEVEL_ANSI: Record<string, string> = {
 	INFO: '\x1b[32m', // green
 	WARN: '\x1b[33m', // yellow
 	ERROR: '\x1b[31m', // red
-	CRITICAL: '\x1b[35m', // magenta
+	CRITICAL: '\x1b[35m' // magenta
 }
 const RESET = '\x1b[0m'
 const DIM = '\x1b[2m'
@@ -68,7 +68,7 @@ const BROWSER_COLOURS = [
 	'#3b82f6',
 	'#8b5cf6',
 	'#d946ef',
-	'#f43f5e',
+	'#f43f5e'
 ]
 
 function hashModule(name: string): number {
@@ -92,7 +92,7 @@ function _hexToRgb(hex: string): { r: number; g: number; b: number } {
 	return {
 		r: (bigint >> 16) & 255,
 		g: (bigint >> 8) & 255,
-		b: bigint & 255,
+		b: bigint & 255
 	}
 }
 

@@ -7,8 +7,8 @@ import type { LogIpcPayload } from './types.js'
 const ipcOn = vi.fn()
 vi.mock('electron', () => ({
 	ipcMain: {
-		on: (...args: unknown[]) => ipcOn(...args),
-	},
+		on: (...args: unknown[]) => ipcOn(...args)
+	}
 }))
 
 type IpcListener = (event: unknown, payload: LogIpcPayload) => void
@@ -24,7 +24,7 @@ function mockLogger(module: string) {
 		warn: vi.fn(),
 		error: vi.fn(),
 		critical: vi.fn(),
-		dispose: vi.fn(),
+		dispose: vi.fn()
 	} as unknown as Logger & {
 		debug: ReturnType<typeof vi.fn>
 		info: ReturnType<typeof vi.fn>
@@ -69,7 +69,7 @@ describe('createIpcLogHandler', () => {
 			['INFO', 'info'],
 			['WARN', 'warn'],
 			['ERROR', 'error'],
-			['CRITICAL', 'critical'],
+			['CRITICAL', 'critical']
 		] as const)('routes %s payloads to logger.%s()', (level, method) => {
 			setup()
 			listener({}, { level, module: 'renderer/ui', message: 'hello' })
@@ -91,8 +91,8 @@ describe('createIpcLogHandler', () => {
 					traceId: 'trace-123',
 					operation: 'fetchPages',
 					data: { count: 3 },
-					error: { name: 'Error', message: 'timeout' },
-				},
+					error: { name: 'Error', message: 'timeout' }
+				}
 			)
 
 			const { logger } = created[0]!

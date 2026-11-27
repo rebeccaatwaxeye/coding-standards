@@ -35,7 +35,7 @@ const LEVEL_METHOD = {
 	INFO: 'info',
 	WARN: 'warn',
 	ERROR: 'error',
-	CRITICAL: 'critical',
+	CRITICAL: 'critical'
 } as const satisfies Record<Exclude<LogLevel, 'SILENT'>, keyof Logger>
 
 /**

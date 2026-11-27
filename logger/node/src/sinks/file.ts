@@ -66,7 +66,7 @@ export function fileSink(options: FileSinkOptions = {}): Sink {
 				const message = err instanceof Error ? err.message : String(err)
 				process.stderr.write(`[logger/file] write failed: ${message}\n`)
 			}
-		},
+		}
 	}
 }
 

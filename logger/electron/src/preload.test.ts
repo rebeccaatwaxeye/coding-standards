@@ -5,18 +5,18 @@ const ipcSend = vi.fn()
 
 vi.mock('electron', () => ({
 	contextBridge: {
-		exposeInMainWorld: (key: string, value: unknown) => exposeInMainWorld(key, value),
+		exposeInMainWorld: (key: string, value: unknown) => exposeInMainWorld(key, value)
 	},
 	ipcRenderer: {
-		send: (channel: string, payload: unknown) => ipcSend(channel, payload),
-	},
+		send: (channel: string, payload: unknown) => ipcSend(channel, payload)
+	}
 }))
 
 type Bridge = (
 	level: string,
 	module: string,
 	message: string,
-	meta?: Record<string, unknown>,
+	meta?: Record<string, unknown>
 ) => void
 
 describe('preload log bridge', () => {
@@ -75,7 +75,7 @@ describe('preload log bridge', () => {
 			expect(payload).toMatchObject({
 				level: 'ERROR',
 				module: 'renderer/api',
-				message: 'request failed',
+				message: 'request failed'
 			})
 		})
 
@@ -85,14 +85,14 @@ describe('preload log bridge', () => {
 			bridge('INFO', 'renderer/ui', 'x', {
 				traceId: 'trace-9',
 				operation: 'render',
-				data: { a: 1 },
+				data: { a: 1 }
 			})
 
 			const [, payload] = ipcSend.mock.calls[0]!
 			expect(payload).toMatchObject({
 				traceId: 'trace-9',
 				operation: 'render',
-				data: { a: 1 },
+				data: { a: 1 }
 			})
 		})
 
@@ -105,7 +105,7 @@ describe('preload log bridge', () => {
 			expect(payload).toEqual({
 				level: 'WARN',
 				module: 'renderer/ui',
-				message: 'careful',
+				message: 'careful'
 			})
 		})
 	})

@@ -40,7 +40,7 @@ describe('redactEntry', () => {
 		expect(result.data).toEqual({
 			API_KEY: '[REDACTED]',
 			ApiKey: '[REDACTED]',
-			apikey: '[REDACTED]',
+			apikey: '[REDACTED]'
 		})
 	})
 
@@ -48,9 +48,9 @@ describe('redactEntry', () => {
 		const entry = {
 			data: {
 				request: {
-					headers: { authorization: 'Bearer xyz', 'content-type': 'application/json' },
-				},
-			},
+					headers: { authorization: 'Bearer xyz', 'content-type': 'application/json' }
+				}
+			}
 		}
 		const result = redactEntry(entry, patterns) as typeof entry
 		expect(result.data.request.headers.authorization).toBe('[REDACTED]')
@@ -71,8 +71,8 @@ describe('redactEntry', () => {
 				message: 'failed',
 				stack: 'stack trace',
 				code: 'E_FAIL',
-				password: 'secret-in-error',
-			},
+				password: 'secret-in-error'
+			}
 		}
 		const result = redactEntry(entry, patterns) as typeof entry
 		expect(result.error.password).toBe('[REDACTED]')

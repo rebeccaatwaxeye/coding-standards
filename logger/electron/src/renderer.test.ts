@@ -5,7 +5,7 @@ type Bridge = (
 	level: string,
 	module: string,
 	message: string,
-	meta?: Record<string, unknown>,
+	meta?: Record<string, unknown>
 ) => void
 
 /**
@@ -63,7 +63,7 @@ describe('createRendererLogger', () => {
 				traceId: 'trace-1',
 				operation: 'fetchPages',
 				data: { count: 2 },
-				error: new Error('timeout'),
+				error: new Error('timeout')
 			})
 
 			const [, , , payload] = bridge.mock.calls[0]!
@@ -171,7 +171,7 @@ describe('createRendererLogger', () => {
 				'INFO',
 				'WARN',
 				'ERROR',
-				'CRITICAL',
+				'CRITICAL'
 			])
 		})
 
@@ -217,7 +217,7 @@ describe('createRendererLogger', () => {
 			['number', 42, '42'],
 			['boolean', true, 'true'],
 			['null', null, 'null'],
-			['undefined', undefined, ''],
+			['undefined', undefined, '']
 		])('formats %s messages', (_label, input, expected) => {
 			const bridge = vi.fn()
 			installWindow(bridge)

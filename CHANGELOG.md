@@ -2,6 +2,15 @@
 
 Notable changes to the `@nocturna/logger` packages and their release pipeline.
 
+## 0.1.9
+
+### Packages
+
+- The `@nocturna/logger/configs` Biome fragment now carries formatter settings
+  (single quotes, `semicolons: "asNeeded"`, `trailingCommas: "none"`,
+  `lineWidth: 100`), matching the §8.1 style rule change (standards v1.10.0).
+  Lint rules unchanged; no code changes.
+
 ## 0.1.8
 
 ### Repository

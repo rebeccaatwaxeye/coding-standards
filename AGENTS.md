@@ -114,15 +114,15 @@ renderer: createRendererLogger(module)
 
 ### Shipped configs (`logger/node/configs/`)
 
-`eslint.flat.js` / `eslint.flat.d.ts` / `biome.json` are **products** exported via the `./configs` package export for consumer projects. The Biome fragment targets Biome 2.5 (`noConsole` with `allow: []`, banning all `console.*` — matching the ESLint twin's `'no-console': ['error', { allow: [] }]`).
+`eslint.flat.js` / `eslint.flat.d.ts` / `biome.json` are **products** exported via the `./configs` package export for consumer projects. The Biome fragment targets Biome 2.5 (`noConsole` with `allow: []`, banning all `console.*` — matching the ESLint twin's `'no-console': ['error', { allow: [] }]`) and carries the §8.1 formatter settings (single quotes, `semicolons: "asNeeded"`, `trailingCommas: "none"`, `lineWidth: 100`).
 
-This repo also dogfoods lint: each JS package root has a `biome.json` (schema 2.5.11, `preset: recommended` plus §14.4's `noEmptyBlockStatements` and `noUnusedVariables` as errors; single quotes, no semicolons, `lineWidth: 100` to match the codebase style). One deliberate divergence from the shipped fragment: the dev configs **omit the `noConsole` rule** because the logger legitimately uses `console.*` (console sink, renderer fallback) — the shipped ESLint snippet notes the same exception for "the logger package itself". `style/noNonNullAssertion` is also off; tests rely on `!` after setup where narrowing is impractical.
+This repo also dogfoods lint: each JS package root has a `biome.json` (schema 2.5.11, `preset: recommended` plus §14.4's `noEmptyBlockStatements` and `noUnusedVariables` as errors; single quotes, no semicolons, no trailing commas, `lineWidth: 100` to match the codebase style). One deliberate divergence from the shipped fragment: the dev configs **omit the `noConsole` rule** because the logger legitimately uses `console.*` (console sink, renderer fallback) — the shipped ESLint snippet notes the same exception for "the logger package itself". `style/noNonNullAssertion` is also off; tests rely on `!` after setup where narrowing is impractical.
 
 ## Code Conventions
 
 - **Doc-comment style**: every module opens with a JSDoc header naming the package and a usage `@example`; exported functions explain contract and defaults. Comments frequently cite the standards document by § number (e.g. "§14.8 — Global error handlers"). Preserve and follow this practice.
 - **TypeScript**: `strict`, `noUncheckedIndexedAccess`, `noImplicitAny`, ES2022 target, `moduleResolution: bundler`. Index access returns `T | undefined` — guard or use non-null assertions only when provably safe (existing code uses `mock.calls[0]!` in tests).
-- **Formatting**: single quotes, no semicolons in existing source (Biome defaults were applied). Match surrounding style.
+- **Formatting**: single quotes, no semicolons, no trailing commas (`semicolons: "asNeeded"` + `trailingCommas: "none"` pinned in each `biome.json`). Match surrounding style.
 - **Naming**: files are kebab-case (`electron-file-sink.ts`); sinks are `xxxSink()` factory functions returning a `Sink` object; types use `Log*` prefix (`LogEntry`, `LogMeta`, `LogError`).
 - **Barrels**: `src/index.ts` is a hand-written barrel grouping exports by section (`// --- Types ---` etc.). Add new exports there; coverage config excludes barrels.
 

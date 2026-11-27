@@ -42,7 +42,7 @@ export type {
 	LoggerOptions,
 	LogLevel,
 	LogMeta,
-	Sink,
+	Sink
 } from '@nocturna/logger'
 export { consoleSink, createLogger, jsonSink, LEVEL_VALUE } from '@nocturna/logger'
 

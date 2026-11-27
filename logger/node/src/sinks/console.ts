@@ -24,7 +24,7 @@ export function consoleSink(): Sink {
 					process.stdout.write(line)
 				}
 			}
-		},
+		}
 	}
 }
 

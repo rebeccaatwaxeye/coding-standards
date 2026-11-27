@@ -8,7 +8,7 @@ function makeEntry(overrides: Partial<LogEntry> = {}): LogEntry {
 		level: 'INFO',
 		module: 'api',
 		message: 'hello',
-		...overrides,
+		...overrides
 	}
 }
 

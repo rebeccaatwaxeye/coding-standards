@@ -38,6 +38,6 @@ export type {
 	LoggerOptions,
 	LogLevel,
 	LogMeta,
-	Sink,
+	Sink
 } from './types.js'
 export { LEVEL_VALUE } from './types.js'

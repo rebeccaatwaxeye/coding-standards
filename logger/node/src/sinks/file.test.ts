@@ -5,7 +5,7 @@ import {
 	readFileSync,
 	rmSync,
 	utimesSync,
-	writeFileSync,
+	writeFileSync
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -22,7 +22,7 @@ function makeEntry(overrides: Partial<LogEntry> = {}): LogEntry {
 		level: 'INFO',
 		module: 'api',
 		message: 'hello',
-		...overrides,
+		...overrides
 	}
 }
 

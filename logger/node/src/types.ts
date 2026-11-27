@@ -53,7 +53,7 @@ export const LEVEL_VALUE: Record<LogLevel, number> = {
 	INFO: 20,
 	WARN: 30,
 	ERROR: 40,
-	CRITICAL: 50,
+	CRITICAL: 50
 }
 
 /**

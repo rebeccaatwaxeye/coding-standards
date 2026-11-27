@@ -11,7 +11,7 @@ function captureSink(): Sink & { entries: LogEntry[] } {
 		entries,
 		write(entry: LogEntry) {
 			entries.push(entry)
-		},
+		}
 	}
 }
 
@@ -50,7 +50,7 @@ describe('createLogger', () => {
 				'INFO',
 				'WARN',
 				'ERROR',
-				'CRITICAL',
+				'CRITICAL'
 			])
 		})
 
@@ -118,7 +118,7 @@ describe('createLogger', () => {
 			log.info('request', {
 				traceId: 'abc123',
 				operation: 'getPages',
-				data: { count: 5 },
+				data: { count: 5 }
 			})
 
 			const entry = sink.entries[0]!
@@ -161,7 +161,7 @@ describe('createLogger', () => {
 
 			expect(sink.entries[0]!.error).toEqual({
 				name: 'Error',
-				message: 'just a string',
+				message: 'just a string'
 			})
 		})
 
@@ -192,7 +192,7 @@ describe('createLogger', () => {
 			['null', null, 'null'],
 			['string', 'hello', 'hello'],
 			['number', 42, '42'],
-			['boolean', true, 'true'],
+			['boolean', true, 'true']
 		])('formats %s', (_label, input, expected) => {
 			const sink = captureSink()
 			const log = createLogger({ module: 't', level: 'DEBUG', sinks: [sink] })
@@ -237,7 +237,7 @@ describe('createLogger', () => {
 				module: 'test',
 				level: 'DEBUG',
 				sinks: [sink],
-				redact: { additionalPatterns: ['internal_id'] },
+				redact: { additionalPatterns: ['internal_id'] }
 			})
 
 			log.info('x', { data: { internal_id: 'abc', user: 'alice' } })
@@ -254,7 +254,7 @@ describe('createLogger', () => {
 			const brokenSink: Sink = {
 				write() {
 					throw new Error('sink exploded')
-				},
+				}
 			}
 
 			const log = createLogger({ module: 'test', level: 'DEBUG', sinks: [brokenSink] })
@@ -273,14 +273,14 @@ describe('createLogger', () => {
 			const brokenSink: Sink = {
 				write() {
 					throw new Error('broken')
-				},
+				}
 			}
 			const sink = captureSink()
 
 			const log = createLogger({
 				module: 'test',
 				level: 'DEBUG',
-				sinks: [brokenSink, sink],
+				sinks: [brokenSink, sink]
 			})
 
 			log.info('still works')
@@ -297,7 +297,7 @@ describe('createLogger', () => {
 				write() {
 					/* capture nothing */
 				},
-				dispose: disposed,
+				dispose: disposed
 			}
 
 			const log = createLogger({ module: 'test', sinks: [sink] })
@@ -313,7 +313,7 @@ describe('createLogger', () => {
 				},
 				dispose() {
 					throw new Error('dispose failed')
-				},
+				}
 			}
 
 			const log = createLogger({ module: 'test', sinks: [sink] })

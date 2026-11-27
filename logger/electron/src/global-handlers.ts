@@ -21,7 +21,7 @@ export function installGlobalHandlers(logger: Logger): void {
 		const error = reason instanceof Error ? reason : new Error(String(reason))
 		logger.critical('Unhandled promise rejection — process cannot continue', {
 			error,
-			data: { type: 'unhandledRejection' },
+			data: { type: 'unhandledRejection' }
 		})
 		// Give sinks time to flush to file before exiting
 		setTimeout(() => process.exit(1), 200)
@@ -30,7 +30,7 @@ export function installGlobalHandlers(logger: Logger): void {
 	process.on('uncaughtException', (error) => {
 		logger.critical('Uncaught exception — process cannot continue', {
 			error,
-			data: { type: 'uncaughtException' },
+			data: { type: 'uncaughtException' }
 		})
 		setTimeout(() => process.exit(1), 200)
 	})

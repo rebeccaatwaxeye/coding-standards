@@ -11,7 +11,7 @@ function makeEntry(overrides: Partial<LogEntry> = {}): LogEntry {
 		level: 'INFO',
 		module: 'api',
 		message: 'hello',
-		...overrides,
+		...overrides
 	}
 }
 
@@ -23,7 +23,7 @@ function memoryStream(): NodeJS.WriteStream & { writes: string[] } {
 		write(chunk: string | Uint8Array): boolean {
 			writes.push(String(chunk))
 			return true
-		},
+		}
 	} as unknown as NodeJS.WriteStream & { writes: string[] }
 }
 
@@ -70,7 +70,7 @@ describe('jsonSink (file)', () => {
 			level: 'INFO',
 			module: 'api',
 			msg: 'hello',
-			data: { orderId: 7 },
+			data: { orderId: 7 }
 		})
 		expect(JSON.parse(lines[1]!).msg).toBe('second')
 	})

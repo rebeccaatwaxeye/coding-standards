@@ -26,7 +26,7 @@ export function createLogger(options: LoggerOptions): Logger {
 	const _level = resolveLevel(options.level)
 	const redactPatterns = buildPatterns(
 		options.redact?.additionalPatterns,
-		options.redact?.includeDefaults !== false,
+		options.redact?.includeDefaults !== false
 	)
 
 	// Deep-copy sinks array at creation time; disable any that fail during write.
@@ -70,8 +70,8 @@ export function createLogger(options: LoggerOptions): Logger {
 						/* logger must never throw */
 					}
 				}
-			},
-		} satisfies Partial<Logger> as Omit<Logger, never>,
+			}
+		} satisfies Partial<Logger> as Omit<Logger, never>
 	)
 
 	return logger as Logger
@@ -89,7 +89,7 @@ function buildEntry(level: LogLevel, module: string, message: string, meta?: Log
 		traceId: meta?.traceId,
 		operation: meta?.operation,
 		data: meta?.data,
-		error: normaliseError(meta?.error),
+		error: normaliseError(meta?.error)
 	}
 }
 

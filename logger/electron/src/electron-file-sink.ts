@@ -25,12 +25,12 @@ import { app } from 'electron'
  * ```
  */
 export function electronFileSink(
-	options: Omit<FileSinkOptions, 'dir'> & { dir?: string } = {},
+	options: Omit<FileSinkOptions, 'dir'> & { dir?: string } = {}
 ): Sink {
 	return fileSink({
 		// Only touch Electron's app API when we actually need the default path
 		dir: options.dir ?? join(app.getPath('userData'), 'logs'),
 		retainDays: options.retainDays ?? 7,
-		maxTotalSizeMB: options.maxTotalSizeMB ?? 100,
+		maxTotalSizeMB: options.maxTotalSizeMB ?? 100
 	})
 }

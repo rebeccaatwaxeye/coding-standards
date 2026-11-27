@@ -9,14 +9,14 @@ const USER_DATA = '/Users/test/Library/Application Support/MyApp'
 const getPath = vi.fn((_name: string): string => USER_DATA)
 vi.mock('electron', () => ({
 	app: {
-		getPath: (name: string) => getPath(name),
-	},
+		getPath: (name: string) => getPath(name)
+	}
 }))
 
 // Mock the core fileSink so we assert on the config it receives
 const fileSinkMock = vi.fn((_options: FileSinkOptions): Sink => ({ write: vi.fn() }))
 vi.mock('@nocturna/logger', () => ({
-	fileSink: (options: FileSinkOptions) => fileSinkMock(options),
+	fileSink: (options: FileSinkOptions) => fileSinkMock(options)
 }))
 
 describe('electronFileSink', () => {

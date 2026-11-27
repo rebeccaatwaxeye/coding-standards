@@ -30,9 +30,9 @@ contextBridge.exposeInMainWorld(
 			level,
 			module,
 			message,
-			...meta,
+			...meta
 		})
-	},
+	}
 )
 
 /**
@@ -46,8 +46,8 @@ export function setupLogBridge(): void {
 				level,
 				module,
 				message,
-				...meta,
+				...meta
 			})
-		},
+		}
 	)
 }

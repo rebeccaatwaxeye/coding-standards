@@ -22,7 +22,7 @@ declare global {
 			level: string,
 			module: string,
 			message: string,
-			meta?: Record<string, unknown>,
+			meta?: Record<string, unknown>
 		) => void
 	}
 }
@@ -66,8 +66,8 @@ export function createRendererLogger(moduleName: string, level?: LogLevel): Logg
 			critical: (msg?: unknown, meta?: LogMeta) => write('CRITICAL', msg, meta),
 			dispose() {
 				/* no-op — no resources to clean up in renderer */
-			},
-		} satisfies Partial<Logger> as Omit<Logger, never>,
+			}
+		} satisfies Partial<Logger> as Omit<Logger, never>
 	)
 
 	return logger as Logger

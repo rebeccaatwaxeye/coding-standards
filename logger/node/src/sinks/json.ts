@@ -33,7 +33,7 @@ export function jsonSink(options: JsonSinkOptions = {}): Sink {
 		return {
 			write(entry: LogEntry) {
 				stream.write(formatJson(entry))
-			},
+			}
 		}
 	}
 
@@ -54,7 +54,7 @@ export function jsonSink(options: JsonSinkOptions = {}): Sink {
 				const message = err instanceof Error ? err.message : String(err)
 				process.stderr.write(`[logger/json] write failed: ${message}\n`)
 			}
-		},
+		}
 	}
 }
 

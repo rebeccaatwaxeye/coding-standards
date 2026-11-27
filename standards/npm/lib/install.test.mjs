@@ -10,7 +10,7 @@ import {
 	install,
 	LANGS,
 	sourceVersion,
-	status,
+	status
 } from './install.mjs'
 
 const assetsDir = fileURLToPath(new URL('../assets/', import.meta.url))
@@ -42,7 +42,7 @@ describe('install', () => {
 			'CODING_STANDARDS.md',
 			'.cursorrules',
 			'agents/standards.json',
-			...LANGS.map((l) => `agents/rules/${l}.md`),
+			...LANGS.map((l) => `agents/rules/${l}.md`)
 		]) {
 			expect(existsSync(join(dir, file)), file).toBe(true)
 		}
@@ -61,7 +61,7 @@ describe('install', () => {
 		const dir = freshTarget()
 		install(dir, ['rust'], assetsDir)
 		expect(readFileSync(join(dir, 'CODING_STANDARDS.md'), 'utf8')).toBe(
-			expectedStandardsDoc(assetsDir, sourceVersion(assetsDir)),
+			expectedStandardsDoc(assetsDir, sourceVersion(assetsDir))
 		)
 	})
 
@@ -115,7 +115,7 @@ describe('status', () => {
 		install(dir, ['typescript'], assetsDir)
 		writeFileSync(
 			join(dir, 'agents', 'rules', 'typescript.md'),
-			`${readFileSync(join(dir, 'agents', 'rules', 'typescript.md'), 'utf8')}\nhand edit\n`,
+			`${readFileSync(join(dir, 'agents', 'rules', 'typescript.md'), 'utf8')}\nhand edit\n`
 		)
 		const report = status(dir, assetsDir)
 		expect(report.ok).toBe(false)
@@ -136,7 +136,7 @@ describe('status', () => {
 		install(dir, ['python'], assetsDir)
 		writeFileSync(
 			join(dir, 'agents', 'standards.json'),
-			'{ "version": "0.0.1", "languages": ["python"] }\n',
+			'{ "version": "0.0.1", "languages": ["python"] }\n'
 		)
 		const report = status(dir, assetsDir)
 		expect(report.ok).toBe(false)
